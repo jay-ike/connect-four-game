@@ -19,9 +19,10 @@ function SteppedForm({
                     ).forEach(
                         function (child, index) {
                             child.style.setProperty("--i", index);
-                            child.classList.remove(outClassIndicator);
                             if (index !== initialIndex) {
                                 child.classList.add(outClassIndicator);
+                            } else {
+                                child.classList.remove(outClassIndicator);
                             }
                         }
                     );

@@ -1,12 +1,16 @@
 import SteppedForm from "./stepped-form.js";
 
 const container = new SteppedForm({
-    parentClass: "menu-container"
+    parentClass: "menu-container",
+    outClassIndicator: "step-out"
 });
 container.initialize();
 
 container.parent.addEventListener("click", function ({target}) {
     if (target.classList.contains("rule-option")) {
         container.gotoStep(1);
+    }
+    if (target.classList.contains("rules-read")) {
+        container.gotoStep(0);
     }
 });
