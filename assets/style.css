@@ -121,7 +121,21 @@ body {
     inset-inline-end: 3.15rem;
 }
 
+.step-out {
+    position: fixed;
+    opacity: 0;
+    visibility: hidden;
+    z-index: -1;
+}
 
+.step {
+    --max: max(var(--i), var(--current));
+    --min: min(var(--i), var(--current));
+    --opacity: clamp(0, 1 + var(--min) - var(--max), 1);
+    margin: 0;
+    opacity: var(--opacity);
+    transition: opacity .35s ease-out;
+}
 
 
 

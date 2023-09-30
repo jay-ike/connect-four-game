@@ -11,11 +11,17 @@
   <title>Connect Four game</title>
 </head>
 <body>
-    <main class="menu-container">
-        <div class="menu">
+    <main class="menu-container" style="--current: 0;">
+        <div class="menu step" style="--i: 0;">
             <button class="menu-option main-option">Play vs player</button>
-            <button class="menu-option">Game rules</button>
+            <button class="menu-option rule-option">Game rules</button>
+        </div>
+        <div class="rules step" style="--i: 1;">
+        </div>
+        <div class="game step" style="--i: 2;">
+    min-inline-size: auto;
         </div>
     </main>
+    <script type="module" src="assets/game-play.js"></script>
 </body>
 </html>
