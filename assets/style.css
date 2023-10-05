@@ -13,8 +13,9 @@
     --h-s-size: 1.25rem;
     --h-m-size: 1.5rem;
     --h-l-size: 3.5rem;
-    --smilley-bg: linear-gradient(black, black) 70% 35% / 3px 6px no-repeat,
-        linear-gradient(black, black) 50% 35% / 3px 6px no-repeat,
+    --eye-size: 3px 5px;
+    --smilley-bg: linear-gradient(black, black) 70% 35% / var(--eye-size) no-repeat,
+        linear-gradient(black, black) 50% 35% / var(--eye-size) no-repeat,
         radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
@@ -22,8 +23,8 @@
         radial-gradient(
             var(--bg, var(--yellow)) 55%,black 55% calc(55% + 3px), transparent 0
         );
-    --smilley-out-bg:linear-gradient(black, black) 30% 35% / 3px 6px no-repeat,
-        linear-gradient(black, black) 54% 35% / 3px 6px no-repeat,
+    --smilley-out-bg:linear-gradient(black, black) 30% 35% / var(--eye-size) no-repeat,
+        linear-gradient(black, black) 54% 35% / var(--eye-size) no-repeat,
         radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
@@ -48,6 +49,11 @@
         25% 25% at 25% calc(87.5% - 4px),
         var(--yellow) 60%, var(--black) 60% calc(60% + 3px), transparent 0
     );
+    --game-grid: "options options"
+                 "player1 player2"
+                 "game-board game-board"
+                 "result result";
+
 
 }
 
@@ -142,11 +148,9 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-.main-option::after {
-    content: "";
-    width: var(--size);
-    aspect-ratio: 2;
-    background: var(--smilley-bg), var(--smilley-bg);
+
+.main-option > svg {
+    flex: 0 1 5.125rem;
 }
 
 .rules-read {
@@ -159,7 +163,8 @@ body {
     inline-size: var(--size);
     position: absolute;
     inset-block-end: calc(-1 * var(--size) / 2);
-    inset-inline-start: calc(50% - var(--size) / 2);
+    inset-inline: 1px;
+    margin-inline: auto;
 }
 
 .rules-read > svg {
@@ -197,7 +202,7 @@ body {
 .rules {
     position: var(--position, relative);
     inline-size: min(100vi - 40px, 480px);
-    padding-block: 1.875rem;
+    padding-block: min(5%, 1.875rem) 1.875rem;
     padding-inline: 1.25rem;
     border-radius: 2.5rem;
     display: flex;
@@ -205,7 +210,7 @@ body {
     gap: 1.25rem;
     container: rules / inline-size;
     max-block-size: calc(100vb - 194px);
-    overflow: hidden scroll;
+    overflow: hidden auto;
 }
 
 .counter-list > li::marker {
