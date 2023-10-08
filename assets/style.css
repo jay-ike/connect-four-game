@@ -19,20 +19,13 @@
         radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
-        ) 70% 120% / 80% 60% no-repeat,
-        radial-gradient(
-            var(--bg, var(--yellow)) 55%,black 55% calc(55% + 3px), transparent 0
-        );
+        ) 70% 120% / 80% 60% no-repeat;
     --smilley-out-bg:linear-gradient(black, black) 30% 35% / var(--eye-size) no-repeat,
         linear-gradient(black, black) 54% 35% / var(--eye-size) no-repeat,
         radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
-        ) 0% 120% / 80% 60% no-repeat,
-        radial-gradient(
-            var(--bg, var(--yellow)) 55%,black 55% calc(55% + 3px),
-            transparent 0
-        );
+        ) 0% 120% / 80% 60% no-repeat;
     --four-dots: radial-gradient(
         25% 25% at 25% calc(12.5% + 4px),
         var(--red) 60%, var(--black) 60% calc(60% + 3px), transparent 0
@@ -49,12 +42,10 @@
         25% 25% at 25% calc(87.5% - 4px),
         var(--yellow) 60%, var(--black) 60% calc(60% + 3px), transparent 0
     );
-    --game-grid: "options options"
-                 "player1 player2"
-                 "game-board game-board"
-                 "result result";
-
-
+    --game-grid: "options options" 2.5rem
+                 "player1 player2" 5rem
+                 "game-board game-board" 3fr
+                 "result result" 10rem / 1fr 1fr;
 }
 
 body {
@@ -100,7 +91,8 @@ body {
     inset: 0;
 }
 
-.elevated, .rules {
+.elevated,
+.h-shadow {
     background-color: var(--bg, var(--white));
     border: .25rem solid var(--bdr-clr, var(--black));
     box-shadow: 0px 8px var(--shadow-clr, var(--black));
@@ -220,11 +212,141 @@ body {
     font-size: var(--h-xs-size);
 }
 
-:is(#_ignore_, .counter-list) {
+.counter-list {
     padding-inline-start: 1rem;
 }
 
+.game {
+    --i-size: 54px;
+    --v-gap: var(--game-v-gap, 3.125rem);
+    display: grid;
+    grid-template: var(--game-grid);
+    min-block-size: 90vb;
+    min-inline-size: calc(100vi - 2.5rem);
+    gap: var(--v-gap) .75rem;
+}
 
+.options {
+    display: flex;
+    justify-content: space-between;
+    grid-area: options;
+}
+
+.scr-board {
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
+	border-radius: 1.25rem;
+	padding: .625rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+    place-self: center var(--h-align, end);
+    inline-size: min(38vi, 272px);
+    position: relative;
+}
+
+.scr-board::before {
+    --bg: var(--i-clr, var(--red));
+    content: "";
+    position: absolute;
+    inline-size: var(--i-size);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: .25rem solid var(--bdr-clr, var(--black));
+    box-shadow: 0px 8px var(--shadow-clr, var(--black));
+    inset-block: 0;
+    inset: var(--i-inset);
+    background: var(--i-bg, var(--smilley-bg));
+    background-color: var(--bg);
+    margin-block: auto;
+}
+
+.scr {
+    --f-size: 2em;
+    --f-size-fluid: 10cqi;
+    line-height: 1.6;
+}
+
+.home {
+    --h-align: var(--player1-align);
+    --i-inset: var(--player1-inset, 0 auto 0 calc(-1 * var(--i-size) / 2));
+    grid-area: player1;
+}
+
+.away {
+    --i-clr: var(--yellow);
+    --i-bg: var(--smilley-out-bg);
+    --i-inset: var(--player2-inset, 0 calc(-1 * var(--i-size) / 2) 0 auto);
+    --h-align: var(--player2-align, start);
+    grid-area: player2;
+}
+
+.game-board {
+    grid-area: game-board;
+    margin-block-end: calc(-20px - var(--v-gap));
+    border-radius: 1.25rem;
+}
+
+.game-result {
+    --clip: var(--r-clip, url(#timer-path));
+    grid-area: result;
+    place-self: center;
+    position: relative;
+}
+
+.result-content {
+    background-color: var(--r-color, var(--red));
+    width: var(--r-i-size, 191px);
+    aspect-ratio: var(--r-ratio, 1.28);
+    clip-path: var(--clip);
+    display: grid;
+    place-content: center;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--rt-color, var(--white));
+    font-weight: bold;
+    padding-block-start: 1rem;
+}
+
+.result-content > p {
+    font-size: 2.5em;
+}
+
+.game-result::before {
+    content: "";
+    position: absolute;
+    inset: -.25rem -.25rem -.5rem;
+    clip-path: var(--clip);
+    background-color: var(--shadow-clr, var(--black));
+}
+
+.game-result::after {
+	content: "";
+	position: fixed;
+	background-color: var(--winner-clr, var(--dark-purple));
+	inset-block-end: 0;
+	z-index: -1;
+	inset-inline: 0;
+	min-block-size: clamp(200px, 29vb, 236px);
+	border-radius:  1.25rem  1.25rem 0 0;
+}
+
+.game-option {
+    font-weight: bold;
+    color: var(--white);
+    background-color: var(--opt-bg, var(--dark-purple));
+    border-radius: 1.25rem;
+    padding-inline: 1.25rem;
+    padding-block: .5rem;
+    text-transform: uppercase;
+    min-inline-size: 4rem;
+}
+
+.game-option:focus,
+.game-option:hover {
+    --opt-bg: var(--red);
+}
 
 @media screen and (min-width: 480px) {
     body {

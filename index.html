@@ -20,7 +20,7 @@
             <button class="elevated menu-option rule-option">Game rules</button>
         </section>
         <section class="step step-out" style="--i: 1;">
-            <div class="rules">
+            <div class="rules h-shadow">
                 <h2 class="h-l">Rules</h2>
                 <h3 class="h-s">Objective</h3>
                 <p>
@@ -57,21 +57,35 @@
                 <button class="game-option menu-opt">menu</button>
                 <button class="game-option res-opt">restart</button>
             </div>
-            <div class="scr-board home">
+            <div class="scr-board elevated home">
                 <h3 class="h-s">player 1</h3>
                 <p class="fluid-type scr">0</p>
             </div>
-            <div class="scr-board away">
+            <div class="scr-board elevated away">
                 <h3 class="h-s">player 2</h3>
                 <p class="fluid-type scr">0</p>
             </div>
-            <div class="game-board elevated"></div>
+            <div class="game-board h-shadow"></div>
             <div class="game-result">
-                <h3 class="h-s">player 1's turn</h3>
-                <p class="timeout">15s</p>
+                <div class="result-content">
+                    <h3 class="h-s">player 1's turn</h3>
+                    <p class="timeout">15s</p>
+                </div>
             </div>
         </section>
     </main>
+
+    <svg xmlns="http://www.w3.org/2000/svg" class="svg">
+        <defs>
+        <clipPath id="timer-path" clipPathUnits="objectBoundingBox">
+            <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="m 0.0044 0.3518 a 0.1327 0.1035 90 0 1 0.0634 -0.1223 h 0.002 l 0.3884 -0.2096 a 0.1327 0.1035 90 0 1 0.08 -0.0002 l 0.3932 0.2099 a 0.1327 0.1035 90 0 1 0.0637 0.1225 v 0.5086 c 0 0.0733 -0.0463 0.1327 -0.1035 0.1327 h -0.7816 c -0.0572 0 -0.1035 -0.0594 -0.1035 -0.1327 z"
+            ></path>
+        </clipPath>
+        </defs>
+    </svg>
     <script type="module" src="assets/game-play.js"></script>
 </body>
 </html>
