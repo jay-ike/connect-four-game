@@ -190,6 +190,13 @@ body {
     margin-inline: auto;
 }
 
+.check {
+    background-color: currentColor;
+    aspect-ratio: 1;
+    inline-size: 100%;
+    clip-path: url(#check);
+}
+
 .rules-read > svg {
     stroke: currentColor;
     aspect-ratio: 1.41;
@@ -198,10 +205,10 @@ body {
 
 .step-out {
     --position: fixed;
+    --margin: auto;
     visibility: hidden;
     z-index: -1;
     inset: 0;
-    margin: auto;
 }
 
 .step {
@@ -209,33 +216,36 @@ body {
     --min: min(var(--i), var(--current));
     --opacity: clamp(0, 1 + var(--min) - var(--max), 1);
     position: var(--position, relative);
-    margin: 0;
+    margin: var(--margin, 0);
     opacity: var(--opacity);
-    transition: opacity .35s ease-out;
 }
 
-.rules > .h-s,
+.rule-section > .h-s,
 .rules > .h-l {
     text-transform: uppercase;
 }
 
-.rules > .h-s {
+.rule-section > .h-s {
     color: var(--purple);
-    margin-block-start: .5625rem;
+
+}
+
+.rule-section > * + *{
+    margin-block-start: 1rem;
+}
+
+.column > * + * {
+    margin-block-start: var(--gap, 1.25rem);
 }
 
 .rules {
+    --gap: 1.25rem;
     position: var(--position, relative);
     inline-size: min(100vi - 40px, 480px);
-    padding-block: min(5%, 1.875rem) 1.875rem;
+    padding-block: min(5%, 1.875rem) 3.375rem;
     padding-inline: 1.25rem;
     border-radius: 2.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
     container: rules / inline-size;
-    max-block-size: calc(100svb - 194px);
-    overflow: hidden auto;
 }
 
 .counter-list > li::marker {
@@ -246,6 +256,7 @@ body {
 }
 
 .counter-list {
+    --gap: .625rem;
     padding-inline-start: 1rem;
 }
 
