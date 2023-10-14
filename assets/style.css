@@ -138,13 +138,16 @@ body {
     align-items: center;
 }
 
-.menu::before {
+.menu::before,
+.options::before {
     content: "";
     position: absolute;
     inline-size: 2.5rem;
     aspect-ratio: 1;
     background: var(--four-dots);
-    inset-block-start: var(--b-start, 0);
+    inset: var(--deco-inset, var(--b-start, 0) auto auto auto);
+    margin-inline: var(--i-margin, auto);
+    margin-block: var(--b-margin, auto);
 }
 .menu-option {
 	font-family: Grotesk;
@@ -251,10 +254,13 @@ body {
 }
 
 .options {
+    --deco-inset: 0;
     display: flex;
     justify-content: space-between;
     grid-area: options;
+    position: relative;
 }
+
 
 .scr-board {
     text-transform: uppercase;
@@ -329,14 +335,30 @@ body {
     background-color: var(--p-bg, var(--purple));
 }
 
+.pawn-home {
+    --p-bg: var(--red);
+    --p-shadow: inset 0 2px 0px 1px hsl(347, 43%, 45%);
+}
+
+.pawn-away {
+    --p-bg: var(--yellow);
+    --p-shadow: inset 0 2px 0px 1px hsl(41, 43%, 45%);
+}
+
+.pawn-won {
+    background-image: radial-gradient(transparent 30%, var(--white) 30% 45%, transparent 0);
+}
+
 .pawn:focus-visible {
     outline: 6px solid var(--dark-purple);
 }
 .pawn:hover {
     outline: none;
+    cursor: pointer;
 }
 
 .game-result {
+    --option-display: var(--button-display, none);
     --clip: var(--r-clip, url(#timer-path));
     grid-area: result;
     place-self: center;
@@ -357,6 +379,14 @@ body {
     padding-block-start: 1rem;
 }
 
+.game-result__end {
+    --option-display: initial;
+    --r-clip: inset(100% round 1.25rem);
+    --r-color: var(--white);
+    --r-i-size: min(285px, 76vi);
+    --rt-color: var(--black);
+    --r-ratio: 1.78;
+}
 .result-content > p {
     font-size: 2.5em;
 }
@@ -389,6 +419,7 @@ body {
     padding-block: .5rem;
     text-transform: uppercase;
     min-inline-size: 4rem;
+    display: var(--option-display, initial);
 }
 
 .game-option:focus,
@@ -428,11 +459,38 @@ body {
     }
     .game {
         --game-width: min(50vi, 632px);
-        --game-h-gap: min(60px, 10vi);
+        --game-h-gap: min(60px, 3vi);
     }
 
     .game-board {
         align-self: center;
+        position: relative;
+    }
+
+    .game-board:not(:hover)::before,
+    .game-board:not(:hover)::after {
+        opacity: 0;
+    }
+
+    .game-board::before,
+    .game-board::after {
+        --pointer-x: calc(1px * var(--indicator-x, 0));
+        --inset: var(--r-indicator-size, 36px);
+        content: "";
+        position: absolute;
+        inset-block-start: var(--indicator-y, calc(-1 * var(--inset)));
+        aspect-ratio: 1.23;
+        inline-size: var(--inset);
+        inset-inline-start: calc(var(--pointer-x) + var(--x-offset, 4px) - 24px);
+        clip-path: url(#indicator);
+        background-color: var(--indicator-bg, var(--red));
+    }
+
+    .game-board::before {
+        --r-indicator-size: 44px;
+        --indicator-y: -38px;
+        --x-offset: 0px;
+        --indicator-bg: var(--black);
     }
 
     .scr-board {
@@ -446,7 +504,7 @@ body {
     @media screen and (orientation: portrait) {
         .game-result {
             --min-decoration-size: 40vb;
-            margin-block-start: max(-10rem, -15vb);
+            margin-block-start: min(-8rem, -10vb);
         }
     }
 }
