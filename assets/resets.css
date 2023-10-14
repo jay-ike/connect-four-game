@@ -35,8 +35,11 @@ ol {
 button {
     border: none;
 }
-.svg {
-    position: absolute;
-    width: 0;
-    height: 0;
+dialog:not([open]) {
+    display: none;
+}
+dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
 }

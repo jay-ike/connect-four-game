@@ -46,6 +46,7 @@
                  "player1 player2" 5rem
                  "game-board game-board" 3fr
                  "result result" 10rem / 1fr 1fr;
+    --elastic-timing: cubic-bezier(.25, .1, .3, 1.5);
 }
 
 body {
@@ -63,6 +64,12 @@ body {
 }
 
 
+.r-bg {
+    --bg: var(--red);
+}
+.y-bg {
+    --bg: var(--yellow);
+}
 .responsive-grid {
     --max-col-width: var(--m-col-w, 12rem);
     --min-row-height: var(--m-row-h, 15rem);
@@ -78,10 +85,6 @@ body {
     ));
     grid-auto-rows: minmax(var(--min-row-height), auto);
     gap: var(--gap);
-}
-
-.column > * + * {
-    margin-block-start: var(--gap, 1rem);
 }
 
 .h-l {
@@ -102,7 +105,7 @@ body {
 .menu-container {
     display: grid;
     place-content: center;
-    min-block-size: 100svb;
+    min-block-size: 90svb;
 }
 
 .e-click {
@@ -126,16 +129,16 @@ body {
     --shadow-clr: var(--dark-purple);
     --bdr-clr: var(--dark-purple);
 }
-.menu {
-    position: relative;
-    padding-block-start: 2rem;
+.column-container {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    min-block-size: max(40svb, 305px);
-    min-inline-size: min(100vi - 40px, 335px);
+    position: var(--position, relative);
+    padding-block: var(--b-pad);
+    justify-content: var(--content, flex-end);
+    align-items: var(--item, center);
+    min-block-size: var(--min-b-size, max(40svb, 305px));
+    min-inline-size: var(--min-i-size, min(100vi - 40px, 335px));
     gap: var(--gap, 1.5rem);
-    align-items: center;
 }
 
 .menu::before,
@@ -152,12 +155,14 @@ body {
 .menu-option {
 	font-family: Grotesk;
 	font-size: var(--h-m-size);
-	font-weight: 500;
+	font-weight: 700;
+    color: var(--option-color, initial);
 	text-transform: uppercase;
 	padding: 1.25rem;
 	border-radius: 1.25rem;
 	text-align: left;
     align-self: stretch;
+    text-align: var(--option-text-align, start);
 }
 .main-option {
     --bg: var(--yellow);
@@ -195,6 +200,8 @@ body {
     --position: fixed;
     visibility: hidden;
     z-index: -1;
+    inset: 0;
+    margin: auto;
 }
 
 .step {
@@ -346,7 +353,11 @@ body {
 }
 
 .pawn-won {
-    background-image: radial-gradient(transparent 30%, var(--white) 30% 45%, transparent 0);
+    background-image: radial-gradient(
+        transparent 30%,
+        var(--white) 30% 45%,
+        transparent 0
+    );
 }
 
 .pawn:focus-visible {
@@ -427,19 +438,42 @@ body {
     --opt-bg: var(--red);
 }
 
+.pause-menu {
+    --position: fixed;
+    --b-pad: 1.875rem;
+    --content: center;
+    --option-text-align: center;
+    text-transform: uppercase;
+    background-color: var(--purple);
+    color: var(--white);
+    padding-inline: clamp(20px, 6%, 40px);
+    border-radius: 1.25rem;
+}
+
+.pause-menu::backdrop {
+    background-color: hsla(0, 0%, 0%, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.opt-quit {
+    --option-color: var(--white);
+}
+
 @media screen and (min-width: 480px) {
 
     body.switch-clr {
         --background: var(--dark-bg);
     }
+    .column-container {
+        inline-size: 480px;
+        border-radius: 2.5rem;
+    }
     .menu {
         --b-start: 2.5rem;
         background-color: var(--purple);
-        inline-size: 480px;
         aspect-ratio: 1.1;
         padding-block: 4.375rem 3.75rem;
         padding-inline: 2.5rem;
-        border-radius: 2.5rem;
         border: solid 3px var(--black);
         box-shadow: 0px 8px var(--shadow-clr, var(--black));
     }
@@ -516,5 +550,13 @@ body {
             var(--f-size-fluid, 5cqi),
             var(--f-size)
         );
+    }
+}
+
+@media(prefers-reduced-motion: no-preference) {
+    .game-board::before,
+    .game-board::after,
+    .elevated {
+        transition: all .35s ease-out;
     }
 }
