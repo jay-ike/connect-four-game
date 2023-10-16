@@ -459,6 +459,11 @@ body {
     color: var(--white);
     padding-inline: clamp(20px, 6%, 40px);
     border-radius: 1.25rem;
+    transform: scale(0);
+}
+
+.pause-menu[open] {
+    transform: scale(1);
 }
 
 .pause-menu::backdrop {
@@ -569,5 +574,9 @@ body {
     .game-board::after,
     .elevated {
         transition: all .35s ease-out;
+    }
+
+    .pause-menu {
+        transition: transform .35s var(--elastic-timing);
     }
 }

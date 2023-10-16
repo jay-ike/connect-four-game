@@ -1,7 +1,8 @@
 import SteppedForm from "./stepped-form.js";
 
 let board;
-
+let dialog = document.querySelector(".pause-menu");
+let isDialogElement = HTMLDialogElement.prototype.isPrototypeOf(dialog);
 function buildPawn(index) {
     const button = document.createElement("button");
     button.index = index;
@@ -26,6 +27,9 @@ container.parent.addEventListener("click", function ({target}) {
     if (target.classList.contains("game-mode")) {
         index = 2;
     }
+    if (target.classList.contains("res-opt") && isDialogElement) {
+        dialog.showModal();
+    }
     container.gotoStep(index);
     if (index === 0) {
         document.body.classList.add("switch-clr");
@@ -33,6 +37,28 @@ container.parent.addEventListener("click", function ({target}) {
         document.body.classList.remove("switch-clr");
     }
 });
+if (isDialogElement) {
+    dialog.addEventListener("cancel", function (event) {
+        event.preventDefault();
+        dialog.close("continue");
+    });
+    dialog.addEventListener("click", function ({target}) {
+        if (target.classList.contains("opt-continue")) {
+            dialog.close("continue");
+        }
+        if (target.classList.contains("opt-restart")) {
+            dialog.close("restart");
+        }
+        if (target.classList.contains("opt-quit")) {
+            dialog.close("quit");
+        }
+    });
+    dialog.addEventListener("transitionend", function (event) {
+        if (!dialog.open) {
+            console.log(dialog.returnValue);
+        }
+    });
+}
 function handlePointer(event) {
     const {target} = event;
     let targetRect;
