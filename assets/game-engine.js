@@ -7,31 +7,30 @@ function timerHandler(
     let intervalId;
     let timeoutId;
     let timeout;
-    return {
-        init(delay = delayInseconds) {
-            timeout = delay;
+    function init(delay = delayInseconds) {
+        timeout = delay;
+        onchange(timeout);
+        intervalId = setInterval(function () {
+            timeout -= 1;
             onchange(timeout);
-            intervalId = setInterval(function () {
-                timeout -= 1;
-                onchange(timeout);
-            }, 1000);
-            timeoutId = setTimeout(function () {
-                onEnd();
-                clearInterval(intervalId);
-            }, delay * 1000);
-        },
-        pause() {
+        }, 1000);
+        timeoutId = setTimeout(function () {
             clearInterval(intervalId);
-            clearTimeout(timeoutId);
-        },
-        resume() {
-            this.init(timeout);
-        },
-        restart() {
-            this.pause();
-            this.init();
-        }
-    };
+            onEnd();
+        }, delay * 1000);
+    }
+    function pause() {
+        clearInterval(intervalId);
+        clearTimeout(timeoutId);
+    }
+    function restart(delay) {
+        pause();
+        init(delay);
+    }
+    function resume() {
+        restart(timeout);
+    }
+    return {init, pause, restart, resume};
 }
 function turnHandler(player1, player2) {
     const state = Object.create(null);
@@ -104,9 +103,19 @@ function Engine(oponent = "player 2") {
     };
     this.init = function () {
         timer.init();
+        return this;
     };
     this.restart = function () {
         timer.restart();
-    }
+        return this;
+    };
+    this.pause = function () {
+        timer.pause();
+        return this;
+    };
+    this.resume = function () {
+        timer.resume();
+        return this;
+    };
 }
 export default Engine;

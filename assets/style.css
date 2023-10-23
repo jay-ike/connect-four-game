@@ -345,10 +345,9 @@ body {
 
 .game-wrapper {
     grid-area: game-board;
+    display: grid;
     place-content: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    place-items: center;
 }
 .game-wrapper::after {
     content: "";
@@ -392,6 +391,10 @@ body {
 .pawn:hover {
     outline: none;
     cursor: pointer;
+}
+
+.away-turn {
+    --r-color: var(--yellow);
 }
 
 .game-result {
@@ -559,10 +562,10 @@ body {
         inline-size: min(15vi, 141px);
         aspect-ratio: 0.75;
     }
-    @media screen and (orientation: portrait) {
-        .game-result {
-            --min-decoration-size: 40vb;
-        }
+}
+@media screen and (orientation: portrait)  and (min-width: 768px) {
+    .game-result {
+        --min-decoration-size: 40vb;
     }
 }
 

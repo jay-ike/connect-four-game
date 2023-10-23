@@ -2,11 +2,25 @@ import SteppedForm from "./stepped-form.js";
 import Engine from "./game-engine.js";
 
 let board;
-let gameState;
-let dialog = document.querySelector(".pause-menu");
-let isDialogElement = HTMLDialogElement.prototype.isPrototypeOf(dialog);
-let engine = new Engine();
-function buildPawn(index) {
+const turnMap = {
+    "player 2": "away-turn",
+    "cpu": "away-turn"
+};
+const dialog = document.querySelector(".pause-menu");
+const engine = new Engine();
+const container = new SteppedForm({
+    parentClass: "menu-container",
+    outClassIndicator: "step-out"
+});
+const dialogActions = {
+    continue: () => engine.resume(),
+    restart: () => engine.restart(),
+    quit: function () {
+        engine.restart().pause();
+        container.gotoStep(0);
+    }
+};
+function buildDisc(index) {
     const button = document.createElement("button");
     button.index = index;
     button.classList.add("pawn");
@@ -14,10 +28,6 @@ function buildPawn(index) {
     return button;
 }
 
-const container = new SteppedForm({
-    parentClass: "menu-container",
-    outClassIndicator: "step-out"
-});
 container.initialize();
 
 container.parent.addEventListener("click", function ({target}) {
@@ -29,11 +39,12 @@ container.parent.addEventListener("click", function ({target}) {
         index = 0;
     }
     if (target.classList.contains("game-mode")) {
-        engine.init();
+        engine.restart();
         index = 2;
     }
-    if (target.classList.contains("res-opt") && isDialogElement) {
+    if (target.classList.contains("res-opt")) {
         dialog.showModal();
+        engine.pause();
     }
     container.gotoStep(index);
     if (index === 0) {
@@ -42,28 +53,26 @@ container.parent.addEventListener("click", function ({target}) {
         document.body.classList.remove("switch-clr");
     }
 });
-if (isDialogElement) {
-    dialog.addEventListener("cancel", function (event) {
-        event.preventDefault();
+dialog.addEventListener("cancel", function (event) {
+    event.preventDefault();
+    dialog.close("continue");
+});
+dialog.addEventListener("click", function ({target}) {
+    if (target.classList.contains("opt-continue")) {
         dialog.close("continue");
-    });
-    dialog.addEventListener("click", function ({target}) {
-        if (target.classList.contains("opt-continue")) {
-            dialog.close("continue");
-        }
-        if (target.classList.contains("opt-restart")) {
-            dialog.close("restart");
-        }
-        if (target.classList.contains("opt-quit")) {
-            dialog.close("quit");
-        }
-    });
-    dialog.addEventListener("transitionend", function () {
-        if (!dialog.open && dialog.returnValue.length > 0) {
-            console.log(dialog.returnValue);
-        }
-    });
-}
+    }
+    if (target.classList.contains("opt-restart")) {
+        dialog.close("restart");
+    }
+    if (target.classList.contains("opt-quit")) {
+        dialog.close("quit");
+    }
+});
+dialog.addEventListener("transitionend", function () {
+    if (!dialog.open && dialog.returnValue.length > 0) {
+        dialogActions[dialog.returnValue]();
+    }
+});
 function handlePointer(event) {
     const {target} = event;
     let targetRect;
@@ -89,6 +98,16 @@ board.nextElementSibling.addEventListener("timeupdated", function ({detail}) {
         timeout.textContent = timeout.textContent.replace(/\d*/, detail.time);
     }
 });
+board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
+    const {currentTurn, previousTurn, won} = detail;
+    const header = this.firstElementChild;
+    if (won === undefined) {
+        header.textContent = header.textContent.replace(previousTurn, currentTurn);
+        this.classList.remove(turnMap[previousTurn] ?? "home-turn");
+        this.classList.add(turnMap[currentTurn] ?? "home-turn");
+        engine.restart();
+    }
+});
 engine.getBoardIndexes().forEach(function (value) {
-    board.appendChild(buildPawn(value));
+    board.appendChild(buildDisc(value));
 });
