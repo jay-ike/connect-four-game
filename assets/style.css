@@ -45,7 +45,7 @@
     --game-grid: "options options" 2.5rem
                  "player1 player2" 5rem
                  "game-board game-board" 3fr
-                 "result result" 10rem / 1fr 1fr;
+                 "game-board game-board" 10rem / 1fr 1fr;
     --elastic-timing: cubic-bezier(.25, .1, .3, 1.5);
 }
 
@@ -269,6 +269,9 @@ body {
     min-block-size: 70svb;
     gap: var(--v-gap) var(--game-h-gap, .75rem);
     padding-block: 1rem;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: bold;
 }
 
 .options {
@@ -281,9 +284,6 @@ body {
 
 
 .scr-board {
-    text-transform: uppercase;
-    text-align: center;
-    font-weight: bold;
 	border-radius: 1.25rem;
 	padding: .625rem;
 	display: flex;
@@ -335,8 +335,6 @@ body {
     --c-gap: clamp(.75rem, 1vi, 1.5rem);
     --m-col-w: calc((100% / var(--m-col-s)) - var(--c-gap, .75rem));
     --m-row-h: calc((100% / 6) - var(--c-gap, .75rem));
-    grid-area: game-board;
-    margin-block-end: calc(-20px - var(--v-gap));
     border-radius: 1.25rem;
     padding-inline: var(--i-pad, .625rem);
     padding-block: var(--b-pad, .625rem 2rem);
@@ -345,6 +343,23 @@ body {
     max-inline-size: var(--game-width, calc(100vi - clamp(1.5rem, 10vi, 2.5rem)));
 }
 
+.game-wrapper {
+    grid-area: game-board;
+    place-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.game-wrapper::after {
+    content: "";
+    position: fixed;
+    background-color: var(--winner-clr, var(--dark-purple));
+    inset-block-end: 0;
+    z-index: -1;
+    inset-inline: 0;
+    min-block-size: var(--min-decoration-size, clamp(200px, 30svb, 275px));
+    border-radius:  1.25rem  1.25rem 0 0;
+}
 .pawn {
     aspect-ratio: 1;
     border-radius: 50%;
@@ -382,55 +397,48 @@ body {
 .game-result {
     --option-display: var(--button-display, none);
     --clip: var(--r-clip, url(#timer-path));
-    grid-area: result;
-    place-self: center;
+    margin-block-start: -1rem;
     position: relative;
-}
-
-.result-content {
-    background-color: var(--r-color, var(--red));
+    isolation: isolate;
     width: var(--r-i-size, 191px);
     aspect-ratio: var(--r-ratio, 1.28);
-    clip-path: var(--clip);
     display: grid;
     place-content: center;
-    text-align: center;
-    text-transform: uppercase;
     color: var(--rt-color, var(--white));
-    font-weight: bold;
     padding-block-start: 1rem;
 }
-
-.game-result__end {
-    --option-display: initial;
-    --r-clip: inset(100% round 1.25rem);
-    --r-color: var(--white);
-    --r-i-size: min(285px, 76vi);
-    --rt-color: var(--black);
-    --r-ratio: 1.78;
-}
-.result-content > p {
-    font-size: 2.5em;
-}
-
-.game-result::before {
+.game-result::before,
+.game-result::after {
     content: "";
     position: absolute;
-    inset: -.25rem -.25rem -.5rem;
     clip-path: var(--clip);
+    z-index: -1;
+}
+.game-result::before {
+    inset: -.25rem -.25rem -.5rem;
     background-color: var(--shadow-clr, var(--black));
 }
 
 .game-result::after {
-	content: "";
-	position: fixed;
-	background-color: var(--winner-clr, var(--dark-purple));
-	inset-block-end: 0;
-	z-index: -1;
-	inset-inline: 0;
-	min-block-size: var(--min-decoration-size, clamp(200px, 30svb, 275px));
-	border-radius:  1.25rem  1.25rem 0 0;
+    inset: 0;
+    background-color: var(--r-color, var(--red));
 }
+
+.game-result__end {
+    --option-display: static;
+    --r-clip: inset(0% round 1.25rem);
+    --r-color: var(--white);
+    --r-i-size: min(285px, 76vi);
+    --rt-color: var(--black);
+    --r-ratio: 1.78;
+    border-radius: 1.25rem;
+}
+.timeout {
+    --f-size: 2.5em;
+    --f-size-diff: 0;
+}
+
+
 
 .game-option {
     font-weight: bold;
@@ -504,7 +512,7 @@ body {
     :root {
         --game-grid: ". . options . ." 2.5rem
         ". player1  game-board player2 ." 1fr
-        "result result result result result" 10rem / 1fr 141px 2fr 141px 1fr;
+        ".  .   game-board  .   . " 10rem / 1fr 141px 2fr 141px 1fr;
 
     }
     .game {
@@ -554,7 +562,6 @@ body {
     @media screen and (orientation: portrait) {
         .game-result {
             --min-decoration-size: 40vb;
-            margin-block-start: min(-8rem, -10vb);
         }
     }
 }
