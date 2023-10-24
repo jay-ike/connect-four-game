@@ -21,20 +21,6 @@ const dialogActions = {
         container.gotoStep(0);
     }
 };
-function buildDisc(index) {
-    const button = document.createElement("button");
-    button.index = index;
-    button.classList.add("pawn");
-    button.setAttribute("aria-label", "a disc not yet selected");
-    button.handleSelection = function () {
-        let canSelect = engine.isNotSelected(index);
-        if (canSelect) {
-            button.classList.add(turnMap[engine.currentTurn()]);
-            engine.selectDisc(index);
-        }
-    };
-    return button;
-}
 
 container.initialize();
 
@@ -45,10 +31,11 @@ container.parent.addEventListener("click", function ({target}) {
     }
     if (target.classList.contains("menu-opt")) {
         index = 0;
+        engine.restart().pause();
     }
     if (target.classList.contains("game-mode")) {
-        engine.restart();
         index = 2;
+        engine.restart();
     }
     if (target.classList.contains("res-opt")) {
         dialog.showModal();
@@ -119,7 +106,24 @@ board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
         engine.restart();
     }
 });
-engine.getBoardIndexes().forEach(function (value) {
-    console.log(value);
-    board.appendChild(buildDisc(value));
+function handleSelection (index) {
+    let label;
+    const canSelect = engine.isNotSelected(index);
+    const turn = engine.currentTurn();
+    if (canSelect) {
+        label = this.getAttribute("aria-label").replace("not yet ", "").replace(
+            /$/,
+            " by " + turn
+        );
+        this.classList.add(turnMap[turn]);
+        this.setAttribute("aria-label", label);
+        engine.selectDisc(index);
+    }
+}
+board.querySelectorAll(".pawn").forEach(function (node) {
+    const index = Number.parseInt(node.dataset.index, 10);
+    const select = handleSelection.bind(node);
+    node.handleSelection = function () {
+        select(index);
+    };
 });
