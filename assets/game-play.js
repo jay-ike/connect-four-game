@@ -3,8 +3,9 @@ import Engine from "./game-engine.js";
 
 let board;
 const turnMap = {
-    "player 2": "away-turn",
-    "cpu": "away-turn"
+    "player 1": "pawn-home",
+    "player 2": "pawn-away",
+    "cpu": "pawn-away"
 };
 const dialog = document.querySelector(".pause-menu");
 const engine = new Engine();
@@ -25,6 +26,13 @@ function buildDisc(index) {
     button.index = index;
     button.classList.add("pawn");
     button.setAttribute("aria-label", "a disc not yet selected");
+    button.handleSelection = function () {
+        let canSelect = engine.isNotSelected(index);
+        if (canSelect) {
+            button.classList.add(turnMap[engine.currentTurn()]);
+            engine.selectDisc(index);
+        }
+    };
     return button;
 }
 
@@ -45,6 +53,9 @@ container.parent.addEventListener("click", function ({target}) {
     if (target.classList.contains("res-opt")) {
         dialog.showModal();
         engine.pause();
+    }
+    if (target.classList.contains("pawn")) {
+        target.handleSelection();
     }
     container.gotoStep(index);
     if (index === 0) {
@@ -103,11 +114,12 @@ board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
     const header = this.firstElementChild;
     if (won === undefined) {
         header.textContent = header.textContent.replace(previousTurn, currentTurn);
-        this.classList.remove(turnMap[previousTurn] ?? "home-turn");
-        this.classList.add(turnMap[currentTurn] ?? "home-turn");
+        this.classList.remove(turnMap[previousTurn]);
+        this.classList.add(turnMap[currentTurn]);
         engine.restart();
     }
 });
 engine.getBoardIndexes().forEach(function (value) {
+    console.log(value);
     board.appendChild(buildDisc(value));
 });

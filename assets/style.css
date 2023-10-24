@@ -393,10 +393,6 @@ body {
     cursor: pointer;
 }
 
-.away-turn {
-    --r-color: var(--yellow);
-}
-
 .game-result {
     --option-display: var(--button-display, none);
     --clip: var(--r-clip, url(#timer-path));
@@ -424,7 +420,7 @@ body {
 
 .game-result::after {
     inset: 0;
-    background-color: var(--r-color, var(--red));
+    background-color: var(--p-bg, var(--red));
 }
 
 .game-result__end {
@@ -562,10 +558,10 @@ body {
         inline-size: min(15vi, 141px);
         aspect-ratio: 0.75;
     }
-}
-@media screen and (orientation: portrait)  and (min-width: 768px) {
-    .game-result {
-        --min-decoration-size: 40vb;
+    @media (orientation: portrait) {
+        .game-result {
+            --min-decoration-size: 40vb;
+        }
     }
 }
 
@@ -588,5 +584,10 @@ body {
 
     .pause-menu {
         transition: transform .35s var(--elastic-timing);
+    }
+    .pawn ,
+    .game-result::before,
+    .game-result::after {
+        transition: all .35s ease-out;
     }
 }
