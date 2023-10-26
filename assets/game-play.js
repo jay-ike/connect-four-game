@@ -5,7 +5,8 @@ let board;
 const turnMap = {
     "player 1": "pawn-home",
     "player 2": "pawn-away",
-    "cpu": "pawn-away"
+    "cpu": "pawn-away",
+    "won": "pawn-won"
 };
 const dialog = document.querySelector(".pause-menu");
 const engine = new Engine();
@@ -15,10 +16,10 @@ const container = new SteppedForm({
 });
 const dialogActions = {
     continue: () => engine.resume(),
-    restart: () => engine.restart(),
+    restart: () => engine.resetBoard().restart(),
     quit: function () {
-        engine.restart().pause();
         container.gotoStep(0);
+        engine.resetBoard().restart().pause();
     }
 };
 
@@ -31,7 +32,7 @@ container.parent.addEventListener("click", function ({target}) {
     }
     if (target.classList.contains("menu-opt")) {
         index = 0;
-        engine.restart().pause();
+        engine.resetBoard().restart().pause();
     }
     if (target.classList.contains("game-mode")) {
         index = 2;
@@ -115,6 +116,10 @@ board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     node.addEventListener("discselected", function ({detail}) {
         let label;
         const {turn, won} = detail;
+        if (typeof turn !== "string") {
+            Object.values(turnMap).forEach((val) => node.classList.remove(val));
+            return;
+        }
         if (won === false) {
             label = "disc selected by " + turn;
             node.classList.add(turnMap[turn]);

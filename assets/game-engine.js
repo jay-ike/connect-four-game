@@ -64,7 +64,7 @@ function turnHandler(player1, player2) {
     };
 }
 function boardHandler(maxRow, maxCol) {
-    const board = Array(maxRow).fill(0).map(() => Array(maxCol).fill(0));
+    let board = Array(maxRow).fill(0).map(() => Array(maxCol).fill(0));
     const indexFrom = (row, col) => (row * maxCol) + col + 1;
     function rowColFrom(index) {
         let row;
@@ -83,6 +83,9 @@ function boardHandler(maxRow, maxCol) {
                 return rowIndex + index;
             }));
         }, []),
+        init() {
+            board = Array(maxRow).fill(0).map(() => Array(maxCol).fill(0));
+        },
         requestDiscSelection(index, value) {
             const [row, col] = rowColFrom(index);
             const defaultResponse = {getIndex: () => null};
@@ -163,6 +166,11 @@ function Engine(oponent = "player 2") {
     };
     this.resume = function () {
         timer.resume();
+        return this;
+    };
+    this.resetBoard = function () {
+        board.init();
+        discStateListeners.forEach((fn) => fn({turn: null}));
         return this;
     };
     this.selectDisc = function (index) {
