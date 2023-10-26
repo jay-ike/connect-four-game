@@ -108,15 +108,6 @@ body {
     min-block-size: 90svb;
 }
 
-.e-click {
-    position: relative;
-}
-.e-click::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-}
-
 .elevated,
 .h-shadow {
     background-color: var(--bg, var(--white));
@@ -332,15 +323,63 @@ body {
 }
 
 .game-board {
-    --c-gap: clamp(.75rem, 1vi, 1.5rem);
-    --m-col-w: calc((100% / var(--m-col-s)) - var(--c-gap, .75rem));
-    --m-row-h: calc((100% / 6) - var(--c-gap, .75rem));
+    --c-gap: 0px;
+    --m-col-w: calc(100% / var(--m-col-s));
+    --m-row-h: calc(100% / 6);
     border-radius: 1.25rem;
-    padding-inline: var(--i-pad, .625rem);
-    padding-block: var(--b-pad, .625rem 2rem);
-    aspect-ratio: 1.08;
-    align-self: end;
-    max-inline-size: var(--game-width, calc(100vi - clamp(1.5rem, 10vi, 2.5rem)));
+    aspect-ratio: 1.16;
+    inline-size: var(--game-width, calc(100vi - clamp(1rem, 5vi, 2.5rem)));
+    background-color: transparent;
+    overflow: clip;
+    isolation: isolate;
+}
+.pawn {
+    --p-size: 50%;
+    background-color: transparent;
+    padding: 0;
+    border-radius: 50%;
+    box-shadow: inset 0px 2px 0 10px;
+    display: grid;
+    grid-template-areas: "pawn";
+}
+
+.pawn::before,
+.pawn::after {
+    content: "";
+    grid-area: pawn;
+    position: relative;
+}
+.pawn::before {
+    background-color: var(--white);
+    -webkit-mask-image: radial-gradient(circle, transparent var(--p-size), black 0);
+    mask-image: radial-gradient(circle, transparent var(--p-size), black 0);
+    place-self: stretch;
+    z-index: 2;
+}
+
+.pawn::after {
+    inline-size: 70%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    place-self: center;
+    background-color: var(--p-bg, transparent);
+    box-shadow: var(--p-shadow, none);
+    transform: var(--p-transform, translateY(var(--p-offset, -20px)));
+}
+.pawn-home {
+    --p-bg: var(--red);
+    --p-shadow: inset 0 2px 0px 2px hsl(347, 43%, 45%);
+    --p-transform: none;
+}
+
+.pawn-away {
+    --p-transform: none;
+    --p-bg: var(--yellow);
+    --p-shadow: inset 0 2px 0px 2px hsl(41, 43%, 45%);
+    --rt-color: var(--black);
+}
+.game-board__indicator {
+    display: none;
 }
 
 .game-wrapper {
@@ -359,34 +398,17 @@ body {
     min-block-size: var(--min-decoration-size, clamp(200px, 30svb, 275px));
     border-radius:  1.25rem  1.25rem 0 0;
 }
-.pawn {
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 3px solid var(--p-border-clr, var(--black));
-    box-shadow: var(--p-shadow, inset 0 2px 0px 1px var(--black));
-    background-color: var(--p-bg, var(--purple));
-}
-
-.pawn-home {
-    --p-bg: var(--red);
-    --p-shadow: inset 0 2px 0px 1px hsl(347, 43%, 45%);
-}
-
-.pawn-away {
-    --p-bg: var(--yellow);
-    --p-shadow: inset 0 2px 0px 1px hsl(41, 43%, 45%);
-}
 
 .pawn-won {
-    background-image: radial-gradient(
+    --p-image: radial-gradient(
         transparent 30%,
         var(--white) 30% 45%,
         transparent 0
     );
 }
 
-.pawn:focus-visible {
-    outline: 6px solid var(--dark-purple);
+.pawn:focus-visible::before {
+    box-shadow: inset 0 0 0 4px var(--dark-purple);
 }
 .pawn:hover {
     outline: none;
@@ -396,7 +418,7 @@ body {
 .game-result {
     --option-display: var(--button-display, none);
     --clip: var(--r-clip, url(#timer-path));
-    margin-block-start: -1rem;
+    margin-block-start: -4px;
     position: relative;
     isolation: isolate;
     width: var(--r-i-size, 191px);
@@ -502,7 +524,6 @@ body {
     }
     .game {
         --game-width: calc(100vi - clamp(2.5rem, 18vi, 136px));
-        --p-shadow: inset 0 calc(.018 * var(--game-width)) 0px 1px var(--black);
     }
 
 }
@@ -515,8 +536,31 @@ body {
 
     }
     .game {
-        --game-width: min(50vi, 632px);
+        --game-width: min(43vi, 480px);
         --game-h-gap: min(60px, 3vi);
+    }
+    .game-board__indicator {
+        --pointer-x: calc(1px * var(--indicator-x, 0));
+        display: block;
+        position: absolute;
+        inset-block-start: -44px;
+        aspect-ratio: 1.23;
+        inline-size: 44px;
+        inset-inline-start: calc(var(--pointer-x) - 22px);
+        clip-path: url(#indicator);
+        background-color: var(--black);
+    }
+
+    .game-board__indicator::before {
+        content: "";
+        position: relative;
+        display: inline-block;
+        width: 38px;
+        aspect-ratio: inherit;
+        inset-block: 2px;
+        margin: auto;
+        background-color: var(--red);
+        clip-path: inherit;
     }
 
     .game-board {
@@ -524,31 +568,7 @@ body {
         position: relative;
     }
 
-    .game-board:not(:hover)::before,
-    .game-board:not(:hover)::after {
-        opacity: 0;
-    }
 
-    .game-board::before,
-    .game-board::after {
-        --pointer-x: calc(1px * var(--indicator-x, 0));
-        --inset: var(--r-indicator-size, 36px);
-        content: "";
-        position: absolute;
-        inset-block-start: var(--indicator-y, calc(-1 * var(--inset)));
-        aspect-ratio: 1.23;
-        inline-size: var(--inset);
-        inset-inline-start: calc(var(--pointer-x) + var(--x-offset, 4px) - 24px);
-        clip-path: url(#indicator);
-        background-color: var(--indicator-bg, var(--red));
-    }
-
-    .game-board::before {
-        --r-indicator-size: 44px;
-        --indicator-y: -38px;
-        --x-offset: 0px;
-        --indicator-bg: var(--black);
-    }
 
     .scr-board {
         --i-inset: calc(-1 * var(--i-size) / 2) 0 0 0;
@@ -576,8 +596,7 @@ body {
 }
 
 @media(prefers-reduced-motion: no-preference) {
-    .game-board::before,
-    .game-board::after,
+    .game-board__indicator,
     .elevated {
         transition: all .35s ease-out;
     }
@@ -585,9 +604,16 @@ body {
     .pause-menu {
         transition: transform .35s var(--elastic-timing);
     }
-    .pawn ,
     .game-result::before,
     .game-result::after {
         transition: all .35s ease-out;
+    }
+    .pawn::after {
+       transition: background-color 0.1s ease-out,
+                   box-shadow 0.1s ease-out,
+                   transform .5s var(--elastic-timing) 0.3s;
+    }
+    .pawn::before {
+        transition: box-shadow .35s ease-out;
     }
 }

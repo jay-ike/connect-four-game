@@ -42,7 +42,7 @@ container.parent.addEventListener("click", function ({target}) {
         engine.pause();
     }
     if (target.classList.contains("pawn")) {
-        target.handleSelection();
+        target.requestSelection();
     }
     container.gotoStep(index);
     if (index === 0) {
@@ -106,24 +106,23 @@ board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
         engine.restart();
     }
 });
-function handleSelection (index) {
-    let label;
-    const canSelect = engine.isNotSelected(index);
-    const turn = engine.currentTurn();
-    if (canSelect) {
-        label = this.getAttribute("aria-label").replace("not yet ", "").replace(
-            /$/,
-            " by " + turn
-        );
-        this.classList.add(turnMap[turn]);
-        this.setAttribute("aria-label", label);
-        engine.selectDisc(index);
-    }
-}
-board.querySelectorAll(".pawn").forEach(function (node) {
+board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     const index = Number.parseInt(node.dataset.index, 10);
-    const select = handleSelection.bind(node);
-    node.handleSelection = function () {
-        select(index);
+    const rect = node.getBoundingClientRect();
+    const parentRect = node.parentElement.getBoundingClientRect();
+    const offset = Math.trunc(parentRect.y - (rect.y + rect.height));
+    node.style.setProperty("--p-offset", offset + "px");
+    node.addEventListener("discselected", function ({detail}) {
+        let label;
+        const {turn, won} = detail;
+        if (won === false) {
+            label = "disc selected by " + turn;
+            node.classList.add(turnMap[turn]);
+            node.setAttribute("aria-label", label);
+        }
+    });
+    node.requestSelection = function () {
+        engine.selectDisc(index);
     };
+    engine.registerDisc(node);
 });
