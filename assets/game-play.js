@@ -105,7 +105,7 @@ board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
         this.classList.remove(turnMap[previousTurn]);
         this.classList.add(turnMap[currentTurn]);
         engine.restart();
-    }
+    };
 });
 board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     const index = Number.parseInt(node.dataset.index, 10);
@@ -123,6 +123,10 @@ board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
         if (won === false) {
             label = "disc selected by " + turn;
             node.classList.add(turnMap[turn]);
+            node.setAttribute("aria-label", label);
+        } else {
+            label = "disc won by " + turn;
+            node.classList.add(turnMap.won);
             node.setAttribute("aria-label", label);
         }
     });
