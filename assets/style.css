@@ -454,8 +454,9 @@ body {
 }
 
 .game-result::after {
+    --bg-color: var(--r-color, var(--p-bg));
     inset: 0;
-    background-color: var(--p-bg, var(--red));
+    background-color: var(--bg-color, var(--red));
 }
 
 .game-result__end {

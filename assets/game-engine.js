@@ -163,22 +163,48 @@ function boardHandler(maxRow, maxCol) {
         }
     };
 }
+function Emitter(initialListeners) {
+    const listeners = Object.create(null);
+    Object.values(initialListeners).forEach(function (name) {
+        listeners[name] = [];
+    });
+    this.register = function (name, fn) {
+        if (listeners[name] === undefined) {
+            listeners[name] = [];
+        }
+        listeners[name][listeners[name].length] = fn;
+    };
+    this.notify = function (name, value, indexes = []) {
+        let registered;
+        if (!Array.isArray(listeners[name])) {
+            return;
+        }
+        if (Array.isArray(indexes) && indexes.length > 0) {
+            registered = [];
+            indexes.forEach(function indexParser(index) {
+                if (typeof listeners[name][index] === "function") {
+                    registered[registered.length] = listeners[name][index];
+                }
+            });
+        } else {
+            registered = listeners[name];
+        }
+        registered.forEach((fn) => fn(value));
+    };
+}
 function Engine(oponent = "player 2") {
     let timer;
+    let isStopped = false;
     const board = boardHandler(6, 7);
     const turn = turnHandler("player 1", oponent);
-    const timeListeners = [];
-    const turnListeners = [];
-    const discStateListeners = [];
-    const updateTime = (time) => timeListeners.forEach((fn) => fn(time));
-    const updateTurn = (state) => turnListeners.forEach((fn) => fn(state));
+    const emitter = new Emitter(["disc", "turn", "time"]);
     function dispatchEvent(node, event) {
         if (typeof node.dispatchEvent === "function") {
             node.dispatchEvent(event);
         }
     }
-    turn.addListener(updateTurn);
-    timer = timerHandler(15, updateTime, () => turn.switchTurn());
+    turn.addListener((state) => emitter.notify("turn", state));
+    timer = timerHandler(15, (time) => emitter.notify("time", time), () => turn.switchTurn());
     this.currentTurn = () => turn.currentState().currentTurn;
     this.previousTurn = () => turn.currentState().previousTurn;
     this.getBoardIndexes = () => board.getBoardIndexes();
@@ -189,25 +215,25 @@ function Engine(oponent = "player 2") {
             });
             dispatchEvent(node, timeUpdated);
         };
-        timeListeners[timeListeners.length] = listener;
+        emitter.register("time", listener);
     };
-    this.addTurnListener = function (node) {
+    this.addTurnListener = function turnRegistration(node) {
         const listener = function (turnState) {
             const turnChanged = new CustomEvent("turnupdated", {
                 detail: turnState
             });
             dispatchEvent(node, turnChanged);
         };
-        turnListeners[turnListeners.length] = listener;
+        emitter.register("turn", listener);
     };
-    this.registerDisc = function (node) {
+    this.registerDisc = function registration(node) {
         function notify(turnState) {
             const discSelected = new CustomEvent("discselected", {
                 detail: turnState
             });
             dispatchEvent(node, discSelected);
         }
-        discStateListeners[discStateListeners.length] = notify;
+        emitter.register("disc", notify);
     };
     this.init = function () {
         timer.init();
@@ -226,8 +252,9 @@ function Engine(oponent = "player 2") {
         return this;
     };
     this.resetBoard = function () {
+        isStopped = false;
         board.init();
-        discStateListeners.forEach((fn) => fn({turn: null}));
+        emitter.notify("disc", {turn: null});
         return this;
     };
     this.selectDisc = function (index) {
@@ -241,20 +268,27 @@ function Engine(oponent = "player 2") {
             ? 1
             : 2
         );
+        if (isStopped) {
+            return;
+        }
         response = board.requestDiscSelection(index, discValue);
         discValue = response.getIndex();
-        if (discValue !== null && discStateListeners[discValue] !== undefined) {
-            discStateListeners[discValue](state);
+        if (discValue !== null) {
+            emitter.notify("disc", state, [discValue]);
             turn.switchTurn();
             timer.restart();
         }
         response = response.consecutiveItems();
         if (response.length === 4) {
+            isStopped = true;
             state.won = true;
-            setTimeout(() => response.forEach(function ([row, col]) {
-                const index = board.getIndexFrom(row, col);
-                discStateListeners[index](state)
-            }), 1500);
+            setTimeout(function () {
+                state.currentTurn = state.turn;
+                emitter.notify("disc", state, response.map(
+                    ([row, col]) => board.getIndexFrom(row, col)
+                ));
+                emitter.notify("turn", state);
+            }, 1500);
         }
     };
 }

@@ -100,12 +100,21 @@ board.nextElementSibling.addEventListener("timeupdated", function ({detail}) {
 board.nextElementSibling.addEventListener("turnupdated", function ({detail}) {
     const {currentTurn, previousTurn, won} = detail;
     const header = this.firstElementChild;
+    let tmp = header.nextElementSibling;
     if (won === undefined) {
         header.textContent = header.textContent.replace(previousTurn, currentTurn);
         this.classList.remove(turnMap[previousTurn]);
         this.classList.add(turnMap[currentTurn]);
         engine.restart();
     };
+    if (won === true) {
+        engine.pause();
+        header.textContent = currentTurn;
+        tmp.textContent = "wins";
+        tmp = this;
+        Object.values(turnMap).forEach((val) => tmp.classList.remove(val));
+        tmp.classList.add("game-result__end");
+    }
 });
 board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     const index = Number.parseInt(node.dataset.index, 10);
