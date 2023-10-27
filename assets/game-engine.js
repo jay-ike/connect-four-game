@@ -168,11 +168,24 @@ function Emitter(initialListeners) {
     Object.values(initialListeners).forEach(function (name) {
         listeners[name] = [];
     });
-    this.register = function (name, fn) {
+    this.register = function (name, fn, notifyWhen) {
+        let listener;
+        if (typeof fn !== "function") {
+            return;
+        }
+        if (typeof notifyWhen === "function") {
+            listener = function (val) {
+                if (notifyWhen(val) === true) {
+                    fn(val);
+                }
+            };
+        } else {
+            listener = fn;
+        }
         if (listeners[name] === undefined) {
             listeners[name] = [];
         }
-        listeners[name][listeners[name].length] = fn;
+        listeners[name][listeners[name].length] = listener;
     };
     this.notify = function (name, value, indexes = []) {
         let registered;
@@ -182,9 +195,7 @@ function Emitter(initialListeners) {
         if (Array.isArray(indexes) && indexes.length > 0) {
             registered = [];
             indexes.forEach(function indexParser(index) {
-                if (typeof listeners[name][index] === "function") {
-                    registered[registered.length] = listeners[name][index];
-                }
+                registered[registered.length] = listeners[name][index];
             });
         } else {
             registered = listeners[name];
@@ -234,6 +245,15 @@ function Engine(oponent = "player 2") {
             dispatchEvent(node, discSelected);
         }
         emitter.register("disc", notify);
+    };
+    this.addGameEndListener = function (node, notifyWhen) {
+        function notify (gameState) {
+            const gameEnd = new CustomEvent("gameterminated", {
+                detail: gameState
+            });
+            dispatchEvent(node, gameEnd);
+        }
+        emitter.register("game", notify, notifyWhen);
     };
     this.init = function () {
         timer.init();
@@ -287,7 +307,7 @@ function Engine(oponent = "player 2") {
                 emitter.notify("disc", state, response.map(
                     ([row, col]) => board.getIndexFrom(row, col)
                 ));
-                emitter.notify("turn", state);
+                emitter.notify("game", {winner: state.turn});
             }, 1500);
         }
     };
