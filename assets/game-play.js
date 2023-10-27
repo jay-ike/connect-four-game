@@ -47,6 +47,9 @@ container.parent.addEventListener("click", function ({target}) {
         components.dialog.showModal();
         engine.pause();
     }
+    if (target.classList.contains("replay")) {
+        engine.replay();
+    }
     if (target.classList.contains("pawn")) {
         target.requestSelection();
     }
@@ -59,22 +62,28 @@ container.parent.addEventListener("click", function ({target}) {
 });
 components.dialog.addEventListener("cancel", function (event) {
     event.preventDefault();
-    dialog.close("continue");
+    event.stopImmediatePropagation();
+    components.dialog.close("continue");
 });
-components.dialog.addEventListener("click", function ({target}) {
+components.dialog.addEventListener("click", function (event) {
+    const {target} = event;
+    event.preventDefault();
     if (target.classList.contains("opt-continue")) {
-        dialog.close("continue");
+        components.dialog.close("continue");
     }
     if (target.classList.contains("opt-restart")) {
-        dialog.close("restart");
+        components.dialog.close("restart");
     }
     if (target.classList.contains("opt-quit")) {
-        dialog.close("quit");
+        components.dialog.close("quit");
     }
 });
-components.dialog.addEventListener("transitionend", function () {
-    if (!dialog.open && dialog.returnValue.length > 0) {
-        dialogActions[dialog.returnValue]();
+components.dialog.addEventListener("transitionend", function (event) {
+    if (event.propertyName !== "transform") {
+        return;
+    }
+    if (!components.dialog.open && components.dialog.returnValue.length > 0) {
+        dialogActions[components.dialog.returnValue]();
     }
 });
 function handlePointer(event) {
@@ -96,6 +105,7 @@ container.parent.addEventListener("touchstart", handlePointer);
 engine.addTimeListener(components.timer);
 engine.addTurnListener(components.result);
 engine.addGameEndListener(components.result);
+engine.addRestartListener(components.result);
 components.scores.forEach(function (score) {
     const isHome = score.classList.contains("home");
     let notifyWhen = ({winner}) => (
@@ -109,11 +119,19 @@ components.scores.forEach(function (score) {
         value = value.replace(/(?:\d*)/, (val) => Number.parseInt(val, 10) + 1);
         score.lastElementChild.textContent = value;
     });
-
 });
 components.timer.addEventListener("timeupdated", function ({detail}) {
     let content = detail.time + "s";
     components.timer.textContent = content;
+});
+components.result.addEventListener("gamerestarted", function ({detail}) {
+    const {turn} = detail;
+    const content = turn + "'s turn";
+    components.resultHeader.textContent = content;
+    Object.values(turnMap).concat(["game-result__end"]).forEach(
+        (val) => components.result.classList.remove(val)
+    );
+    components.result.classList.add(turnMap[turn]);
 });
 components.result.addEventListener("turnupdated", function ({detail}) {
     const {currentTurn, previousTurn} = detail;

@@ -48,8 +48,10 @@ function turnHandler(player1, player2) {
         init() {
             if (state.starter === player2) {
                 state.starter = player1;
+                state.currentTurn = player2;
             } else {
                 state.starter = player2;
+                state.currentTurn = player1;
             }
             state.previousTurn = state.currentTurn;
             state.currentTurn = state.starter;
@@ -144,6 +146,9 @@ function boardHandler(maxRow, maxCol) {
         getIndexFrom: (row, col) => indexFrom(row, col) - 1,
         init() {
             board = Array(maxRow).fill(0).map(() => Array(maxCol).fill(0));
+        },
+        isFilled() {
+            return board.every((row) => row.every((val) => val !== 0));
         },
         requestDiscSelection(index, value) {
             let row;
@@ -255,6 +260,15 @@ function Engine(oponent = "player 2") {
         }
         emitter.register("game", notify, notifyWhen);
     };
+    this.addRestartListener = function (node) {
+        function notify(state) {
+            const gameRestarted = new CustomEvent("gamerestarted", {
+                detail: state
+            });
+            dispatchEvent(node, gameRestarted);
+        }
+        emitter.register("restart", notify);
+    };
     this.init = function () {
         timer.init();
         return this;
@@ -276,6 +290,13 @@ function Engine(oponent = "player 2") {
         board.init();
         emitter.notify("disc", {turn: null});
         return this;
+    };
+    this.replay = function () {
+        let currentPlayer;
+        turn.init();
+        currentPlayer = turn.currentState().currentTurn;
+        emitter.notify("restart", {turn: currentPlayer});
+        this.resetBoard();
     };
     this.selectDisc = function (index) {
         let response;
@@ -308,6 +329,11 @@ function Engine(oponent = "player 2") {
                     ([row, col]) => board.getIndexFrom(row, col)
                 ));
                 emitter.notify("game", {winner: state.turn});
+            }, 1500);
+        }
+        if (board.isFilled()) {
+            setTimeout(function () {
+                emitter.notify("game", {});
             }, 1500);
         }
     };
