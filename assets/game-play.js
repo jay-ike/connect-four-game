@@ -139,7 +139,6 @@ components.result.addEventListener("turnupdated", function ({detail}) {
     components.resultHeader.textContent = content;
     this.classList.remove(turnMap[previousTurn], "game-result__end");
     this.classList.add(turnMap[currentTurn]);
-    engine.restart();
 });
 components.result.addEventListener("gameterminated", function ({detail}) {
     const {winner} = detail;
