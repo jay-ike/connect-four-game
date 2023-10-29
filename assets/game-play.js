@@ -1,6 +1,8 @@
 import SteppedForm from "./stepped-form.js";
 import Engine from "./game-engine.js";
+import {SimpleMode} from "./modes.js";
 
+let mode;
 const turnMap = {
     "player 1": "pawn-home",
     "player 2": "pawn-away",
@@ -41,6 +43,8 @@ container.parent.addEventListener("click", function ({target}) {
     }
     if (target.classList.contains("game-mode")) {
         index = 2;
+        mode = new SimpleMode();
+        engine.setMode(mode);
         engine.restart();
     }
     if (target.classList.contains("res-opt")) {
@@ -100,12 +104,24 @@ function handlePointer(event) {
         );
     }
 };
+function updateScore(node, value) {
+    let score = node.lastElementChild.textContent;
+    const replacer = (val) => (
+        Number.isFinite(value)
+        ? value
+        : Number.parseInt(val, 10) + 1
+    );
+    score = score.replace(/(?:\d*)/, replacer);
+    node.lastElementChild.textContent = score;
+};
+
 container.parent.addEventListener("mouseover", handlePointer);
 container.parent.addEventListener("touchstart", handlePointer);
 engine.addTimeListener(components.timer);
 engine.addTurnListener(components.result);
 engine.addGameEndListener(components.result);
 engine.addRestartListener(components.result);
+
 components.scores.forEach(function (score) {
     const isHome = score.classList.contains("home");
     let notifyWhen = ({winner}) => (
@@ -114,16 +130,25 @@ components.scores.forEach(function (score) {
         : typeof winner === "string" && winner !== "player 1"
     );
     engine.addGameEndListener(score, notifyWhen);
+    engine.addModeListener(score);
     score.addEventListener("gameterminated", function () {
-        let value = score.lastElementChild.textContent;
-        value = value.replace(/(?:\d*)/, (val) => Number.parseInt(val, 10) + 1);
-        score.lastElementChild.textContent = value;
+        updateScore(score);
+    });
+    score.addEventListener("modechanged", function({detail}) {
+        updateScore(score, 0);
+        if (isHome) {
+            score.firstElementChild.textContent = detail.player1;
+        } else {
+            score.firstElementChild.textContent = detail.player2;
+        }
     });
 });
+
 components.timer.addEventListener("timeupdated", function ({detail}) {
     let content = detail.time + "s";
     components.timer.textContent = content;
 });
+
 components.result.addEventListener("gamerestarted", function ({detail}) {
     const {turn} = detail;
     const content = turn + "'s turn";
@@ -133,6 +158,7 @@ components.result.addEventListener("gamerestarted", function ({detail}) {
     );
     components.result.classList.add(turnMap[turn]);
 });
+
 components.result.addEventListener("turnupdated", function ({detail}) {
     const {currentTurn, previousTurn} = detail;
     const content = currentTurn + "'s turn";
@@ -140,6 +166,7 @@ components.result.addEventListener("turnupdated", function ({detail}) {
     this.classList.remove(turnMap[previousTurn], "game-result__end");
     this.classList.add(turnMap[currentTurn]);
 });
+
 components.result.addEventListener("gameterminated", function ({detail}) {
     const {winner} = detail;
     let content;
@@ -159,6 +186,7 @@ components.result.addEventListener("gameterminated", function ({detail}) {
     components.timer.textContent = content;
     components.result.classList.add("game-result__end");
 });
+
 components.board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     const index = Number.parseInt(node.dataset.index, 10);
     const rect = node.getBoundingClientRect();
@@ -183,7 +211,7 @@ components.board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
         }
     });
     node.requestSelection = function () {
-        engine.selectDisc(index);
+        mode.selectDisc(index);
     };
     engine.registerDisc(node);
 });

@@ -1,10 +1,10 @@
 import {Emitter, StopWatch, TurnManager} from "./utils.js";
 import Board from "./board.js";
-function Engine(oponent = "player 2") {
+function Engine(boardRows = 6, boardCols = 7) {
     let timer = new StopWatch();
-    let isStopped = false;
-    const board = new Board(6, 7);
-    const turn = new TurnManager("player 1", oponent);
+    let turn;
+    let mode;
+    const board = new Board(boardRows, boardCols);
     const emitter = new Emitter(["disc", "turn", "time"]);
     function dispatchEvent(node, event) {
         if (typeof node.dispatchEvent === "function") {
@@ -15,6 +15,7 @@ function Engine(oponent = "player 2") {
         let newState;
         turn.switchTurn();
         newState = turn.currentState();
+        mode.updateTurn(newState.currentTurn);
         emitter.notify("turn", newState);
         timer.restart();
     }
@@ -38,6 +39,15 @@ function Engine(oponent = "player 2") {
             dispatchEvent(node, turnChanged);
         };
         emitter.register("turn", listener);
+    };
+    this.addModeListener = function modeListener(node) {
+        const notifier = function (state) {
+            const modeChanged = new CustomEvent("modechanged", {
+                detail: state
+            });
+            dispatchEvent(node, modeChanged);
+        };
+        emitter.register("mode", notifier);
     };
     this.registerDisc = function registration(node) {
         function notify(turnState) {
@@ -71,6 +81,9 @@ function Engine(oponent = "player 2") {
         return this;
     };
     this.restart = function () {
+        let turnState = turn.currentState();
+        emitter.notify("turn", turnState);
+        mode.updateTurn(turnState.currentTurn);
         timer.restart();
         return this;
     };
@@ -83,7 +96,6 @@ function Engine(oponent = "player 2") {
         return this;
     };
     this.resetBoard = function () {
-        isStopped = false;
         board.init();
         emitter.notify("disc", {turn: null});
         return this;
@@ -93,6 +105,7 @@ function Engine(oponent = "player 2") {
         turn.init();
         currentPlayer = turn.currentState().currentTurn;
         emitter.notify("restart", {turn: currentPlayer});
+        mode.updateTurn(currentPlayer);
         this.resetBoard().restart();
     };
     this.selectDisc = function (index) {
@@ -106,9 +119,6 @@ function Engine(oponent = "player 2") {
             ? 1
             : 2
         );
-        if (isStopped) {
-            return;
-        }
         response = board.requestDiscSelection(index, discValue);
         discValue = response.getIndex();
         if (discValue !== null) {
@@ -117,8 +127,8 @@ function Engine(oponent = "player 2") {
         }
         response = response.consecutiveItems();
         if (response.length === 4) {
-            isStopped = true;
             state.won = true;
+            mode.updateTurn(null);
             setTimeout(function () {
                 state.currentTurn = state.turn;
                 emitter.notify("disc", state, response.map(
@@ -128,10 +138,18 @@ function Engine(oponent = "player 2") {
             }, 1500);
         }
         if (board.isFilled()) {
+            mode.updateTurn(null);
             setTimeout(function () {
                 emitter.notify("game", {});
             }, 1500);
         }
+    };
+    this.setMode = function (newMode) {
+        const {player1, player2} = newMode;
+        turn = new TurnManager(player1, player2);
+        newMode.setup(this, turn.currentState().currentTurn);
+        mode = newMode;
+        emitter.notify("mode", {player1, player2});
     };
 }
 export default Engine;
