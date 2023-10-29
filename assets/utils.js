@@ -1,11 +1,29 @@
 
+function sealerFactory() {
+    const weakmap = new WeakMap();
+    return Object.freeze({
+        seal(object) {
+            const box = Object.freeze(Object.create(null));
+            weakmap.set(box, object);
+            return box;
+        },
+        unseal(box) {
+            return weakmap.get(box);
+        }
+    });
+}
+
 function Emitter(initialListeners) {
     const listeners = Object.create(null);
+    const sealer = sealerFactory();
+
     Object.values(initialListeners).forEach(function (name) {
         listeners[name] = [];
     });
+
     this.register = function (name, fn, notifyWhen) {
         let listener;
+        let registration;
         if (typeof fn !== "function") {
             return;
         }
@@ -21,7 +39,9 @@ function Emitter(initialListeners) {
         if (listeners[name] === undefined) {
             listeners[name] = [];
         }
-        listeners[name][listeners[name].length] = listener;
+        registration = sealer.seal(listener);
+        listeners[name][listeners[name].length] = registration;
+        return registration;
     };
     this.notify = function (name, value, indexes = []) {
         let registered;
@@ -36,7 +56,18 @@ function Emitter(initialListeners) {
         } else {
             registered = listeners[name];
         }
-        registered.forEach((fn) => fn(value));
+        registered.forEach(function (registration) {
+            let fn = sealer.unseal(registration);
+            if (typeof fn === "function") {
+                fn(value);
+            }
+        });
+    };
+    this.unregister = function (name, registration) {
+        if (!Array.isArray(listeners[name])) {
+            return;
+        }
+        listeners[name] = listeners[name].filter((reg) => reg !== registration);
     };
 }
 
