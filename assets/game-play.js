@@ -1,6 +1,6 @@
 import SteppedForm from "./stepped-form.js";
 import Engine from "./game-engine.js";
-import {SimpleMode} from "./modes.js";
+import modeMap from "./modes.js";
 
 let mode;
 const turnMap = {
@@ -27,23 +27,24 @@ const dialogActions = {
 container.initialize();
 components.dialog = document.querySelector(".pause-menu");
 components.board = container.parent.querySelector(".game-board");
-components.scores = container.parent.querySelectorAll(".scr-board");
+components.scores = container.parent.querySelectorAll(".score");
 components.result = components.board.nextElementSibling;
 components.resultHeader = components.result.firstElementChild;
 components.timer = components.resultHeader.nextElementSibling;
 
 container.parent.addEventListener("click", function ({target}) {
     let index;
-    if (target.classList.contains("rule-option")) {
+    if (target.dataset.mode === "rules") {
         index = 1;
     }
-    if (target.classList.contains("menu-opt")) {
+    if (target.dataset.mode === "menu") {
         index = 0;
         engine.resetBoard().restart().pause();
     }
-    if (target.classList.contains("game-mode")) {
+    if (typeof modeMap[target.dataset.mode] === "function") {
         index = 2;
-        mode = new SimpleMode();
+        components.scores[1].firstElementChild.textContent = target.dataset.mode;
+        mode = modeMap[target.dataset.mode]();
         engine.setMode(mode);
         engine.restart();
     }
@@ -72,15 +73,7 @@ components.dialog.addEventListener("cancel", function (event) {
 components.dialog.addEventListener("click", function (event) {
     const {target} = event;
     event.preventDefault();
-    if (target.classList.contains("opt-continue")) {
-        components.dialog.close("continue");
-    }
-    if (target.classList.contains("opt-restart")) {
-        components.dialog.close("restart");
-    }
-    if (target.classList.contains("opt-quit")) {
-        components.dialog.close("quit");
-    }
+    components.dialog.close(target.dataset.option);
 });
 components.dialog.addEventListener("transitionend", function (event) {
     if (event.propertyName !== "transform") {
@@ -123,7 +116,7 @@ engine.addGameEndListener(components.result);
 engine.addRestartListener(components.result);
 
 components.scores.forEach(function (score) {
-    const isHome = score.classList.contains("home");
+    const isHome = score.classList.contains("home-score");
     let notifyWhen = ({winner}) => (
         isHome
         ? winner === "player 1"

@@ -14,18 +14,19 @@
     --h-m-size: 1.5rem;
     --h-l-size: 3.5rem;
     --eye-size: 3px 5px;
-    --smilley-bg: linear-gradient(black, black) 70% 35% / var(--eye-size) no-repeat,
+    --oponent-eye:linear-gradient(black, black) 30% 35% / var(--eye-size) no-repeat,
+        linear-gradient(black, black) 54% 35% / var(--eye-size) no-repeat;
+    --player1-smilley: linear-gradient(black, black) 70% 35% / var(--eye-size) no-repeat,
         linear-gradient(black, black) 50% 35% / var(--eye-size) no-repeat,
         radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
         ) 70% 120% / 80% 60% no-repeat;
-    --smilley-out-bg:linear-gradient(black, black) 30% 35% / var(--eye-size) no-repeat,
-        linear-gradient(black, black) 54% 35% / var(--eye-size) no-repeat,
-        radial-gradient(
+    --player2-smilley: var(--oponent-eye), radial-gradient(
             35% 50% at 55% 0%, transparent 60%, black 60% calc(60% + 3px),
             transparent 0
         ) 0% 120% / 80% 60% no-repeat;
+    --cpu-smilley: var(--oponent-eye);
     --four-dots: radial-gradient(
         25% 25% at 25% calc(12.5% + 4px),
         var(--red) 60%, var(--black) 60% calc(60% + 3px), transparent 0
@@ -181,7 +182,8 @@ body {
     margin-inline: auto;
 }
 
-.check {
+.rules-read span {
+    display: inline-block;
     background-color: currentColor;
     aspect-ratio: 1;
     inline-size: 100%;
@@ -274,18 +276,16 @@ body {
 }
 
 
-.scr-board {
+.score {
 	border-radius: 1.25rem;
-	padding: .625rem;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
+    display: grid;
+    place-content: center;
     place-self: center var(--h-align, end);
     inline-size: min(38vi, 272px);
     position: relative;
 }
 
-.scr-board::before {
+.score::before {
     --bg: var(--i-clr, var(--red));
     content: "";
     position: absolute;
@@ -296,30 +296,32 @@ body {
     box-shadow: 0px 4px var(--shadow-clr, var(--black));
     inset-block: 0;
     inset: var(--i-inset);
-    background: var(--i-bg, var(--smilley-bg));
+    background: var(--i-bg, var(--player1-smilley));
     background-color: var(--bg);
     margin-block: var(--scr-b-margin, auto);
     margin-inline: var(--scr-i-margin, none);
 }
 
-.scr {
+.score .fluid-type {
     --f-size: 2em;
     --f-size-fluid: 10cqi;
     line-height: 1.6;
 }
 
-.home {
+.home-score {
     --h-align: var(--player1-align);
     --i-inset: var(--player1-inset, 0 auto 0 calc(-1 * var(--i-size) / 2));
     grid-area: player1;
 }
 
-.away {
+.away-score {
     --i-clr: var(--yellow);
-    --i-bg: var(--smilley-out-bg);
     --i-inset: var(--player2-inset, 0 calc(-1 * var(--i-size) / 2) 0 auto);
     --h-align: var(--player2-align, start);
     grid-area: player2;
+}
+.score[data-player="player 2"] {
+    --i-bg: var(--player2-smilley);
 }
 
 .game-board {
@@ -584,7 +586,7 @@ body {
 
 
 
-    .scr-board {
+    .score {
         --i-inset: calc(-1 * var(--i-size) / 2) 0 0 0;
         --scr-i-margin: auto;
         --scr-b-margin: none;

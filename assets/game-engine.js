@@ -1,16 +1,18 @@
 import {Emitter, StopWatch, TurnManager} from "./utils.js";
 import Board from "./board.js";
+
+function dispatchEvent(node, event) {
+    if (typeof node.dispatchEvent === "function") {
+        node.dispatchEvent(event);
+    }
+}
+
 function Engine(boardRows = 6, boardCols = 7) {
     let timer = new StopWatch();
     let turn;
     let mode;
     const board = new Board(boardRows, boardCols);
     const emitter = new Emitter(["disc", "turn", "time"]);
-    function dispatchEvent(node, event) {
-        if (typeof node.dispatchEvent === "function") {
-            node.dispatchEvent(event);
-        }
-    }
     function switchTurn() {
         let newState;
         turn.switchTurn();
@@ -81,10 +83,13 @@ function Engine(boardRows = 6, boardCols = 7) {
         return this;
     };
     this.restart = function () {
-        let turnState = turn.currentState();
-        emitter.notify("turn", turnState);
-        mode.updateTurn(turnState.currentTurn);
-        timer.restart();
+        let turnState;
+        if (turn !== undefined) {
+            turnState = turn.currentState();
+            emitter.notify("turn", turnState);
+            mode.updateTurn(turnState.currentTurn);
+            timer.restart();
+        }
         return this;
     };
     this.pause = function () {
