@@ -318,6 +318,18 @@ dark-purple-bg {
     inline-size: var(--game-width, calc(100vi - clamp(1rem, 5vi, 2.5rem)));
     background-color: transparent;
     isolation: isolate;
+    position: relative;
+    padding-block-end: 2.5em;
+}
+
+.game-board::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 2.5em;
+    background-color: var(--white);
+    border-radius: 0 0 1rem 1rem;
 }
 
 .indicator {
@@ -399,13 +411,14 @@ dark-purple-bg {
     position:relative;
 }
 
-.decoration {
+.game-wrapper::before {
+    content: "";
     position: fixed;
     background-color: var(--winner-clr, var(--dark-purple));
     inset-block-end: 0;
     z-index: -2;
     inset-inline: 0;
-    min-block-size: var(--min-decoration-size, clamp(200px, 30svb, 275px));
+    min-block-size: var(--min-decoration-size, clamp(200px, 35svb, 400px));
     border-radius:  1.25rem  1.25rem 0 0;
 }
 
@@ -425,12 +438,6 @@ dark-purple-bg {
 }
 .pawn:nth-of-type(7)::before {
     border-top-right-radius: 1rem;
-}
-.pawn:nth-of-type(36)::before {
-    border-bottom-left-radius: 1rem;
-}
-.pawn:last-of-type::before {
-    border-bottom-right-radius: 1rem;
 }
 .pawn:focus-visible,
 .pawn:hover {
@@ -452,6 +459,13 @@ dark-purple-bg {
     padding: var(--btn-pad, 1.25rem);
 }
 
+[data-winner="player 1" i] {
+    --winner-clr: var(--red);
+}
+[data-winner="player 2" i],
+[data-winner="cpu" i] {
+    --winner-clr: var(--yellow);
+}
 [data-clip="result"] {
     --path: url(#result-path);
 }
@@ -484,7 +498,7 @@ dark-purple-bg {
 .game-result {
     --option-display: var(--button-display, none);
     --clip-size: var(--r-i-size, 191px);
-    margin-block-start: -4px;
+    margin-block-start: -2em;
     position: relative;
     isolation: isolate;
     inline-size: min(var(--clip-size), 90vi);

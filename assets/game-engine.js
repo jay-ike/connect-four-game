@@ -155,6 +155,7 @@ function Engine(boardRows = 6, boardCols = 7) {
         newMode.setup(this, turn.currentState().currentTurn);
         mode = newMode;
         emitter.notify("mode", {player1, player2});
+        emitter.notify("restart", {turn: turn.currentState().currentTurn});
     };
 }
 export default Engine;

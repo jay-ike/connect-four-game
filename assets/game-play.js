@@ -152,6 +152,7 @@ components.result.addEventListener("gamerestarted", function ({detail}) {
         (val) => components.result.classList.remove(val)
     );
     components.result.classList.add(turnMap[turn]);
+    delete this.parentElement.dataset.winner;
 });
 
 components.result.addEventListener("turnupdated", function ({detail}) {
@@ -173,6 +174,7 @@ components.result.addEventListener("gameterminated", function ({detail}) {
     if (typeof winner === "string") {
         content = "wins";
         heading = winner;
+        this.parentElement.dataset.winner = winner;
     } else {
         content = "draw";
         heading = "";
