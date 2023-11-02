@@ -34,6 +34,7 @@ components.timer = components.resultHeader.nextElementSibling;
 
 container.parent.addEventListener("click", function ({target}) {
     let index;
+    let tmp;
     if (target.dataset.mode === "rules") {
         index = 1;
     }
@@ -43,12 +44,11 @@ container.parent.addEventListener("click", function ({target}) {
     }
     if (typeof modeMap[target.dataset.mode] === "function") {
         index = 2;
-        components.scores[1].firstElementChild.textContent = target.dataset.mode;
         mode = modeMap[target.dataset.mode]();
         engine.setMode(mode);
         engine.restart();
     }
-    if (target.classList.contains("res-opt")) {
+    if (target.dataset.option === "restart") {
         components.dialog.showModal();
         engine.pause();
     }
@@ -83,6 +83,7 @@ components.dialog.addEventListener("transitionend", function (event) {
         dialogActions[components.dialog.returnValue]();
     }
 });
+
 function handlePointer(event) {
     const {target} = event;
     let targetRect;
@@ -132,6 +133,7 @@ components.scores.forEach(function (score) {
         if (isHome) {
             score.firstElementChild.textContent = detail.player1;
         } else {
+            score.dataset.player = detail.player2;
             score.firstElementChild.textContent = detail.player2;
         }
     });

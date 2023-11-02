@@ -11,19 +11,20 @@
   <title>Connect Four game</title>
 </head>
 <body>
-    <main class="menu-container" style="--current: 0;">
-        <section class="menu column-container step" style="--i: 0;">
-            <button class="elevated menu-option" data-mode="cpu">play vs cpu</button>
-            <button class="elevated menu-option main-option" data-mode="player">
-                Play vs player
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 82 46 " fill="none">
-                    <path d="M26.14 3.605A20.286 20.286 0 0 0 5.853 23.891 20.286 20.286 0 0 0 26.14 44.178a20.286 20.286 0 0 0 15.847-7.694l.02.028c3.716 4.67 9.45 7.666 15.883 7.666 11.203 0 20.287-9.084 20.287-20.287 0-11.204-9.084-20.286-20.287-20.286-6.431 0-12.159 2.996-15.875 7.665A20.286 20.286 0 0 0 26.14 3.605z" style="stroke:#000;stroke-width:2.64599;fill:none;fill-opacity:1"/>
-                    <path d="M26.14 3.605A20.286 20.286 0 0 0 5.852 23.891 20.286 20.286 0 0 0 26.14 44.177a20.286 20.286 0 0 0 20.286-20.286A20.286 20.286 0 0 0 26.14 3.605Z" style="stroke:#000;stroke-width:2.64599;fill:none;fill-opacity:1"/><path fill="#000" d="M71.635 22.31c0 5.602-4.54 10.143-10.142 10.143-5.602 0-10.143-4.54-10.143-10.143h2.646a7.497 7.497 0 1 0 14.993 0zm-10.767-5.77v4.4h-2.646v-4.4zm7.35 0v4.4h-2.646v-4.4zm-28.334 5.77c0 5.602-4.542 10.143-10.143 10.143-5.602 0-10.143-4.54-10.143-10.143h2.646a7.497 7.497 0 1 0 14.994 0zm-10.768-5.77v4.4H26.47v-4.4zm7.35 0v4.4H33.82v-4.4z" style="stroke-width:.881998"/>
-                </svg>
+    <main class="content-centered menu-container" style="--current: 0;">
+        <section class="menu column-container step uppercase" style="--i: 0;">
+            <div class="four-dots"></div>
+            <button class="btn elevated menu-option r-bg space-between" data-mode="cpu">
+                play vs cpu
+                <span class="clip" data-clip="cpu"></span>
             </button>
-            <button class="elevated menu-option" data-mode="rules">Game rules</button>
+            <button class="btn elevated menu-option y-bg space-between" data-mode="player">
+                Play vs player
+                <span class="clip" data-clip="player"></span>
+            </button>
+            <button class="btn elevated menu-option" data-mode="rules">Game rules</button>
         </section>
-        <section class="step step-out rules h-shadow column" style="--i: 1;">
+        <section class="step step-out rules h-shadow flow" style="--i: 1;">
             <h2 class="h-l">Rules</h2>
             <div class="rule-section">
                 <h3 class="h-s">Objective</h3>
@@ -51,28 +52,29 @@
             </div>
             <button
                 aria-label="a check icon indicating to confirm you're done reading the rules"
-                class="rules-read elevated"
+                class="r-bg rules-read elevated"
                 data-mode="menu"
                 >
-                <span class="check"></span>
+                <span class="clip" data-clip="check"></span>
             </button>
         </section>
-        <section class="game step step-out" style="--i: 2;">
-            <div class="options">
-                <button class="game-option menu-opt" data-mode="menu">menu</button>
-                <button class="game-option res-opt" data-option="restart">restart</button>
+        <section class="game uppercase step step-out" style="--i: 2;">
+            <div class="options space-between">
+                <button class="btn game-option dark-purple-bg " data-mode="menu">menu</button>
+                <div class="four-dots"></div>
+                <button class="btn game-option dark-purple-bg" data-option="restart">restart</button>
             </div>
-            <div class="score home-score elevated">
+            <div class="score home-score elevated content-centered">
                 <h3 class="h-s">player 1</h3>
                 <p class="fluid-type">0</p>
             </div>
-            <div class="score away-score elevated" data-player="player 2">
+            <div class="score away-score elevated content-centered" data-player="player 2">
                 <h3 class="h-s">player 2</h3>
                 <p class="fluid-type">0</p>
             </div>
-            <div class="game-wrapper">
+            <div class="content-centered game-wrapper">
                 <div class="game-board h-shadow responsive-grid">
-                    <div class="game-board__indicator"></div>
+                    <div class="indicator clip" data-clip="indicator"></div>
                     <button class="pawn" aria-label="a disc not yet selected" data-index="1"></button>
                     <button class="pawn" aria-label="a disc not yet selected" data-index="2"></button>
                     <button class="pawn" aria-label="a disc not yet selected" data-index="3"></button>
@@ -116,23 +118,24 @@
                     <button class="pawn" aria-label="a disc not yet selected" data-index="41"></button>
                     <button class="pawn" aria-label="a disc not yet selected" data-index="42"></button>
                 </div>
-                <div class="game-result">
+                <div class="game-result content-centered" data-clip="result">
                     <h3 class="h-s">player 1's turn</h3>
                     <p class="timeout">15s</p>
-                    <button class="game-option replay">play again</button>
+                    <button class="btn game-option dark-purple-bg replay">play again</button>
                 </div>
+                <div class="decoration"></div>
             </div>
         </section>
     </main>
-    <dialog class="column-container pause-menu h-shadow">
+    <dialog class="column-container uppercase pause-menu h-shadow">
         <h2 class="h-l">pause</h2>
-        <button class="elevated menu-option" data-option="continue">continue game</button>
-        <button class="elevated menu-option"data-option="restart">restart</button>
-        <button class="elevated menu-option r-bg" data-option="quit">quit game</button>
+        <button class="btn elevated menu-option" data-option="continue">continue game</button>
+        <button class="btn elevated menu-option"data-option="restart">restart</button>
+        <button class="btn elevated menu-option r-bg" data-option="quit">quit game</button>
     </dialog>
     <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
         <defs>
-        <clipPath id="timer-path" clipPathUnits="objectBoundingBox">
+        <clipPath id="result-path" clipPathUnits="objectBoundingBox">
             <path
                 fill-rule="evenodd"
                 clip-rule="evenodd"
@@ -152,6 +155,12 @@
                 clip-rule="evenodd"
                 d="m 0.7967 0.3045 a 0.0315 0.0315 90 0 0 -0.0218 0.0101 l -0.3129 0.3406 l -0.1659 -0.1806 a 0.0315 0.0315 90 0 0 -0.0441 -0.0017 a 0.0315 0.0315 90 0 0 -0.0017 0.0445 l 0.189 0.2058 a 0.0315 0.0315 90 0 0 0.0462 0 l 0.336 -0.3654 a 0.0315 0.0315 90 0 0 -0.0017 -0.0445 a 0.0315 0.0315 90 0 0 -0.0227 -0.0084 z"
             />
+        </clipPath>
+        <clipPath id="player-vs-cpu" clipPathUnits="objectBoundingBox">
+            <path d="m 0.708 0.0326 a 0.4663 0.2579 90 0 0 -0.2171 0.215 a 0.4665 0.258 90 1 0 0.0023 0.5091 a 0.4661 0.2578 90 0 0 0.4728 -0.2576 c 0 -0.2574 -0.1157 -0.4666 -0.258 -0.4666 z m 0 0.0651 c 0.1228 0 0.222 0.1795 0.222 0.4015 s -0.0992 0.4015 -0.222 0.4015 a 0.4008 0.2216 90 0 1 -0.1952 -0.2103 a 0.4639 0.2566 90 0 0 -0.0017 -0.3767 a 0.4008 0.2216 90 0 1 0.1969 -0.2159 z m -0.432 0.0063 c 0.1229 0 0.222 0.1792 0.222 0.4015 c 0 0.222 -0.0991 0.4015 -0.222 0.4015 a 0.401 0.2218 90 0 1 -0.222 -0.4015 c 0 -0.2222 0.0991 -0.4015 0.222 -0.4015 z m 0.347 0.209 v 0.0651 h 0.06 v -0.0651 h -0.06 z m 0.1099 0 v 0.0651 h 0.06 v -0.0651 h -0.06 z m -0.5225 0.0054 v 0.1081 h 0.036 v -0.1081 h -0.036 z m 0.1001 0 v 0.1081 h 0.036 v -0.1081 h -0.036 z m 0.2774 0.1211 v 0.0651 h 0.24 v -0.0651 h -0.24 z m -0.441 0.0208 a 0.2496 0.138 90 1 0 0.276 0 h -0.036 a 0.1845 0.102 90 1 1 -0.204 0 h -0.036 z"/>
+        </clipath>
+        <clipPath id="player-vs-player" clipPathUnits="objectBoundingBox">
+            <path d="m 0.2804 0.0326 a 0.4678 0.2623 90 0 0 -0.2621 0.4674 a 0.4674 0.2621 90 0 0 0.4815 0.255 a 0.467 0.2618 90 0 0 0.4815 -0.255 a 0.4672 0.262 90 0 0 -0.4815 -0.255 a 0.4674 0.2621 90 0 0 -0.2194 -0.2124 z m 0 0.0652 c 0.1248 0 0.2255 0.1796 0.2255 0.4022 s -0.1007 0.4022 -0.2255 0.4022 a 0.4018 0.2253 90 0 1 -0.2255 -0.4022 c 0 -0.2226 0.1007 -0.4022 0.2255 -0.4022 z m 0.4388 0 c 0.1248 0 0.2255 0.1796 0.2255 0.4022 s -0.1007 0.4022 -0.2255 0.4022 c -0.0865 0 -0.1613 -0.0863 -0.1992 -0.2135 a 0.4646 0.2605 90 0 0 0 -0.3774 a 0.4015 0.2251 90 0 1 0.1992 -0.2135 z m -0.4343 0.2211 v 0.1083 h 0.0366 v -0.1083 h -0.0366 z m 0.1017 0 v 0.1083 h 0.0366 v -0.1083 h -0.0366 z m 0.3372 0 v 0.1083 h 0.0366 v -0.1083 h -0.0366 z m 0.1017 0 v 0.1083 h 0.0366 v -0.1083 h -0.0366 z m -0.6355 0.142 a 0.25 0.1402 90 1 0 0.2804 0 h -0.0366 a 0.1848 0.1036 90 1 1 -0.2072 0 h -0.0366 z m 0.4388 0 a 0.25 0.1402 90 1 0 0.2804 0 h -0.0366 a 0.1848 0.1036 90 1 1 -0.2072 0 h -0.0366 z"/>
         </clipPath>
         </defs>
     </svg>
