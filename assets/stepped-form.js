@@ -1,139 +1,88 @@
-function SteppedForm({
-    childrenClasses = ["step"],
-    indicatorUpdateFn,
-    outClassIndicator = "step_out",
-    parentClass = "allstep"
-}) {
-    var self = Object.create(this);
-    var indicator = "--current";
-    var oldIndex;
-    var listeners = [];
-    self.parent = document.querySelector(`.${parentClass}`);
-    function initialize(initialIndex = 0) {
-        if (self.parent != null) {
-            self.parent.style.setProperty(indicator, initialIndex);
-            childrenClasses.forEach(
-                function (childClass) {
-                    self.parent.querySelectorAll(
-                        `.${childClass}`
-                    ).forEach(
-                        function (child, index) {
-                            child.style.setProperty("--i", index);
-                            if (index !== initialIndex) {
-                                child.classList.add(outClassIndicator);
-                            } else {
-                                child.classList.remove(outClassIndicator);
-                            }
-                        }
-                    );
-                }
-            );
-            if (indicatorUpdateFn !== undefined) {
-                indicatorUpdateFn(self.parent,initialIndex, initialIndex);
-            }
-        }
+/*jslint-disable*/
+class Stepper extends HTMLElement {
+    #current;
+    #outClassIndicator;
+    constructor() {
+        super();
     }
 
-
-    function getCurrentIndex () {
-        return Number.parseInt(
-            self.parent.style.getPropertyValue(indicator),
-            10
-        );
+    static define() {
+       if (typeof window.customElements === "object") {
+           window.customElements.define("step-by-step", Stepper);
+       } else {
+           console.warn("custom elements are not supported in this browser");
+       }
     }
 
-    function updateStep (indexUpdater) {
-        var allChildren = [];
-        var nextIndex;
-        oldIndex = getCurrentIndex();
-         nextIndex= indexUpdater(oldIndex);
-        if (self.parent != null) {
-            childrenClasses.forEach(function (childClass) {
-                allChildren.push(
-                    self.parent.querySelectorAll(
-                       `.${childClass}`
-                    )
-                );
-            });
-            if (allChildren.some(
-                value => (value[nextIndex] != null) || value.length === nextIndex)
-                ) {
-                allChildren.forEach(function (child) {
-                    stepHandler(child, nextIndex);
-                });
-                notifyListeners(nextIndex, oldIndex);
-            }
-        }
+    static get observedAttributes() {
+        return ["style"];
     }
-    function stepHandler (child, nextIndex) {
-        if (child[nextIndex]) {
-            self.parent.style.setProperty(
-                indicator,
-                nextIndex
-            );
-            child[oldIndex].classList.add(outClassIndicator);
-            child[nextIndex].classList.remove(outClassIndicator);
+
+    connectedCallback() {
+        let index;
+        let outIndicator;
+        if (!this.isConnected) {
+            return;
         }
-        if (indicatorUpdateFn !== undefined) {
-            updateRangeStep(
-                function (current, next) {
-                    indicatorUpdateFn(
-                        self.parent,
-                        current,
-                        next
-                    );
-                },
-                oldIndex,
-                nextIndex
-            );
+        index = Number.parseInt(this.getAttribute("initial-index"), 10);
+        if (!Number.isFinite(index)) {
+            index = 0;
         }
-    }
-    function updateRangeStep (fn, begin, end) {
-        var current = begin;
-        var next;
-        while (current !== end) {
-            if (current > end) {
-                next = current - 1;
+        outIndicator = this.getAttribute("out-indicator");
+        this.#outClassIndicator = outIndicator;
+        this.#updateCurrent(index);
+        Array.from(this.children).forEach(function (elt, i) {
+            elt.style.setProperty("--o", index);
+            if (i === index) {
+                elt.classList.remove(outIndicator);
             } else {
-                next = current + 1;
+                elt.classList.add(outIndicator);
             }
-            fn(current, next);
-            current = next;
-        }
-    }
-    function nextStep() {
-        updateStep((index) => index + 1);
+        });
     }
 
-    function previousStep() {
-        updateStep((index) => index - 1);
-    }
-
-    function gotoStep(index) {
-        if (typeof index === "number") {
-            updateStep(() => index);
+    attributeChangedCallback(name, ignore, newValue) {
+        const current = "--current: " + this.#current + ";";
+        if (newValue.match(current) === null && name === "style") {
+            this.style.setProperty("--current", this.#current);
         }
     }
 
-    function addIndexListener(fn) {
-        var index = listeners.length - 1;
-        listeners[index + 1] = fn;
+    #updateCurrent(index) {
+        this.#current = index;
+        this.style.setProperty("--current", index);
     }
 
-    function notifyListeners(currentIndex, oldIndex) {
-        var i = 0;
-        while (i < listeners.length) {
-            listeners[i](currentIndex, oldIndex);
-            i += 1;
+    #updateStep(indexUpdater) {
+        var next;
+        var old;
+        var event;
+        old = this.#current;
+        next = indexUpdater(old);
+        if (this.children.item(next) !== null) {
+            event = new CustomEvent("indexupdated", {
+                detail: {
+                    current: next,
+                    previous: old
+                }
+            });
+            this.children.item(old).classList.add(this.#outClassIndicator);
+            this.children.item(next).classList.remove(this.#outClassIndicator);
+            this.#updateCurrent(next);
+            this.dispatchEvent(event);
         }
     }
-
-    self.previousStep = previousStep;
-    self.nextStep = nextStep;
-    self.initialize = initialize;
-    self.gotoStep = gotoStep;
-    self.getCurrentIndex = getCurrentIndex;
-    self.addIndexListener = addIndexListener;
-    return self;
+    nextStep() {
+        this.#updateStep((index) => index + 1);
+    }
+    previousStep() {
+        this.#updateStep((index) => index - 1);
+    }
+    gotoStep(index) {
+        if (Number.isFinite(index)) {
+            this.#updateStep(() => index);
+        }
+    }
 }
-export default SteppedForm;
+export {Stepper};
+/*jslint-enable*/

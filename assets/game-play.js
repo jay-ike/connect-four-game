@@ -1,40 +1,36 @@
-import SteppedForm from "./stepped-form.js";
+/*jslint browser this*/
+import {Stepper} from "./stepped-form.js";
 import Engine from "./game-engine.js";
 import modeMap from "./modes.js";
 
 let mode;
 const turnMap = {
+    "cpu": "pawn-away",
     "player 1": "pawn-home",
     "player 2": "pawn-away",
-    "cpu": "pawn-away",
     "won": "pawn-won"
 };
 const components = Object.create(null);
 const engine = new Engine();
-const container = new SteppedForm({
-    parentClass: "menu-container",
-    outClassIndicator: "step-out"
-});
 const dialogActions = {
     continue: () => engine.resume(),
-    restart: () => engine.resetBoard().restart(),
     quit: function () {
-        container.gotoStep(0);
+        components.container.gotoStep(0);
         engine.resetBoard().restart().pause();
-    }
+    },
+    restart: () => engine.resetBoard().restart()
 };
 
-container.initialize();
+components.container = document.querySelector("step-by-step");
 components.dialog = document.querySelector(".pause-menu");
-components.board = container.parent.querySelector(".game-board");
-components.scores = container.parent.querySelectorAll(".score");
+components.board = components.container.querySelector(".game-board");
+components.scores = components.container.querySelectorAll(".score");
 components.result = components.board.nextElementSibling;
 components.resultHeader = components.result.firstElementChild;
 components.timer = components.resultHeader.nextElementSibling;
 
-container.parent.addEventListener("click", function ({target}) {
+components.container.addEventListener("click", function ({target}) {
     let index;
-    let tmp;
     if (target.dataset.mode === "rules") {
         index = 1;
     }
@@ -58,7 +54,9 @@ container.parent.addEventListener("click", function ({target}) {
     if (target.classList.contains("pawn")) {
         target.requestSelection();
     }
-    container.gotoStep(index);
+    if (Number.isFinite(index)) {
+        this.gotoStep(index);
+    }
     if (index === 0) {
         document.body.classList.add("switch-clr");
     } else {
@@ -97,7 +95,7 @@ function handlePointer(event) {
             (targetRect.left - parentRect.left) + targetRect.width / 2
         );
     }
-};
+}
 function updateScore(node, value) {
     let score = node.lastElementChild.textContent;
     const replacer = (val) => (
@@ -107,10 +105,10 @@ function updateScore(node, value) {
     );
     score = score.replace(/(?:\d*)/, replacer);
     node.lastElementChild.textContent = score;
-};
+}
 
-container.parent.addEventListener("mouseover", handlePointer);
-container.parent.addEventListener("touchstart", handlePointer);
+components.container.addEventListener("mouseover", handlePointer);
+components.container.addEventListener("touchstart", handlePointer);
 engine.addTimeListener(components.timer);
 engine.addTurnListener(components.result);
 engine.addGameEndListener(components.result);
@@ -118,17 +116,19 @@ engine.addRestartListener(components.result);
 
 components.scores.forEach(function (score) {
     const isHome = score.classList.contains("home-score");
-    let notifyWhen = ({winner}) => (
-        isHome
-        ? winner === "player 1"
-        : typeof winner === "string" && winner !== "player 1"
-    );
+    let notifyWhen = function ({winner}) {
+        if (isHome) {
+            return winner === "player 1";
+        } else {
+            return typeof winner === "string" && winner !== "player 1";
+        }
+    };
     engine.addGameEndListener(score, notifyWhen);
     engine.addModeListener(score);
     score.addEventListener("gameterminated", function () {
         updateScore(score);
     });
-    score.addEventListener("modechanged", function({detail}) {
+    score.addEventListener("modechanged", function ({detail}) {
         updateScore(score, 0);
         if (isHome) {
             score.firstElementChild.textContent = detail.player1;
@@ -212,3 +212,4 @@ components.board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     };
     engine.registerDisc(node);
 });
+Stepper.define();

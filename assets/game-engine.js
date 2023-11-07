@@ -1,5 +1,7 @@
+/*jslint browser this*/
 import {Emitter, StopWatch, TurnManager} from "./utils.js";
 import Board from "./board.js";
+const {CustomEvent} = window;
 
 function dispatchEvent(node, event) {
     if (typeof node.dispatchEvent === "function") {
@@ -61,7 +63,7 @@ function Engine(boardRows = 6, boardCols = 7) {
         emitter.register("disc", notify);
     };
     this.addGameEndListener = function (node, notifyWhen) {
-        function notify (gameState) {
+        function notify(gameState) {
             const gameEnd = new CustomEvent("gameterminated", {
                 detail: gameState
             });
@@ -137,7 +139,9 @@ function Engine(boardRows = 6, boardCols = 7) {
             setTimeout(function () {
                 state.currentTurn = state.turn;
                 emitter.notify("disc", state, response.map(
-                    ([row, col]) => board.getIndexFrom(row, col)
+                    function ([row, col]) {
+                        return board.getIndexFrom(row, col);
+                    }
                 ));
                 emitter.notify("game", {winner: state.turn});
             }, 1500);
@@ -158,4 +162,4 @@ function Engine(boardRows = 6, boardCols = 7) {
         emitter.notify("restart", {turn: turn.currentState().currentTurn});
     };
 }
-export default Engine;
+export default Object.freeze(Engine);
