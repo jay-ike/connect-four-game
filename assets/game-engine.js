@@ -115,7 +115,7 @@ function Engine(boardRows = 6, boardCols = 7) {
         mode.updateTurn(currentPlayer);
         this.resetBoard().restart();
     };
-    this.selectDisc = function (index) {
+    function selectDisc(index) {
         let response;
         let state = {
             turn: turn.currentState().currentTurn,
@@ -155,11 +155,20 @@ function Engine(boardRows = 6, boardCols = 7) {
     };
     this.setMode = function (newMode) {
         const {player1, player2} = newMode;
+        const select = function (index) {
+            if (mode === newMode) {
+                selectDisc(index);
+            }
+        }
         turn = new TurnManager(player1, player2);
-        newMode.setup(this, turn.currentState().currentTurn);
+        newMode.setup(select, turn.currentState().currentTurn);
+        if (typeof mode?.destroy === "function") {
+            mode.destroy();
+        }
         mode = newMode;
         emitter.notify("mode", {player1, player2});
         emitter.notify("restart", {turn: turn.currentState().currentTurn});
+
     };
 }
 export default Object.freeze(Engine);

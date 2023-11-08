@@ -36,6 +36,9 @@ components.container.addEventListener("click", function ({target}) {
     }
     if (target.dataset.mode === "menu") {
         index = 0;
+        if (typeof mode?.destroy === "function") {
+            mode.destroy();
+        }
         engine.resetBoard().restart().pause();
     }
     if (typeof modeMap[target.dataset.mode] === "function") {
