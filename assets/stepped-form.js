@@ -32,10 +32,9 @@ class Stepper extends HTMLElement {
         this.#outClassIndicator = outIndicator;
         this.#updateCurrent(index);
         Array.from(this.children).forEach(function (elt, i) {
-            elt.style.setProperty("--o", index);
-            if (i === index) {
-                elt.classList.remove(outIndicator);
-            } else {
+            elt.style.setProperty("--i", i);
+            elt.classList.remove(outIndicator);
+            if (i !== index) {
                 elt.classList.add(outIndicator);
             }
         });
