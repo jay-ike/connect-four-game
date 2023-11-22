@@ -215,4 +215,11 @@ components.board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     };
     engine.registerDisc(node);
 });
+document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") {
+        engine.pause();
+    } else {
+        engine.resume();
+    }
+});
 Stepper.define();
