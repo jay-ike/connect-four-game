@@ -216,9 +216,12 @@ components.board.querySelectorAll(".pawn").forEach(function setupDisc(node) {
     engine.registerDisc(node);
 });
 document.addEventListener("visibilitychange", function () {
+    let currentStep = components.container.style.getPropertyValue("--current");
+    currentStep = Number.parseInt(currentStep, 10);
     if (document.visibilityState === "hidden") {
         engine.pause();
-    } else {
+    }
+    if (document.visibilityState !== "hidden" && currentStep === 2) {
         engine.resume();
     }
 });

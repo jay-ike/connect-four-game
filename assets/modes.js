@@ -1,4 +1,6 @@
 /*jslint browser this*/
+import {StopWatch} from "./utils.js";
+
 function SimpleMode() {
     let turn;
     let choose;
@@ -28,9 +30,11 @@ function SimpleMode() {
 function CPUMode() {
     let turn;
     let moves = [];
-    let timeoutId = setInterval(requestSelection, 5000);
+    let timer = new StopWatch(5);
     let choose;
 
+    timer.addStopListener(requestSelection);
+    timer.init();
     this.player1 = "player 1";
     this.player2 = "cpu";
 
@@ -46,6 +50,13 @@ function CPUMode() {
         }
         turn = initialTurn;
     };
+    window.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") {
+            timer.pause();
+        } else {
+            timer.resume();
+        }
+    });
 
     function requestSelection() {
         let fn = moves.shift();
@@ -64,6 +75,7 @@ function CPUMode() {
         if (turn === "cpu") {
             discIndex = Math.floor(Math.random() * 42);
             moves[moves.length] = () => choose(discIndex);
+            timer.restart();
         }
     };
 
