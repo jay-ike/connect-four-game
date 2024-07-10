@@ -99,6 +99,10 @@ function StopWatch(delayInSecond = 15, tickInSecond = 1) {
     this.resume = function resume() {
         this.restart(timeout);
     };
+    this.stop = function () {
+        this.pause();
+        timeout = 0;
+    };
     this.addTickListener = function tickListener(fn, listenWhen) {
         emitter.register("tick", fn, listenWhen);
     };

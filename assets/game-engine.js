@@ -121,11 +121,8 @@ function Engine(boardRows = 6, boardCols = 7) {
             turn: turn.currentState().currentTurn,
             won: false
         };
-        let discValue = (
-            state.turn === "player 1"
-            ? 1
-            : 2
-        );
+        let discValue = mode.getMarkers() ?? {};
+        discValue = discValue[state.turn];
         response = board.requestDiscSelection(index, discValue);
         discValue = response.getIndex();
         if (discValue !== null) {
@@ -155,13 +152,16 @@ function Engine(boardRows = 6, boardCols = 7) {
     };
     this.setMode = function (newMode) {
         const {player1, player2} = newMode;
-        const select = function (index) {
+        const config = {};
+        config.selector = function (index) {
             if (mode === newMode) {
                 selectDisc(index);
             }
-        }
+        };
         turn = new TurnManager(player1, player2);
-        newMode.setup(select, turn.currentState().currentTurn);
+        config.getBoard = () => Array.from(board.getMatrix());
+        config.initialTurn = turn.currentState().currentTurn;
+        newMode.setup(config);
         if (typeof mode?.destroy === "function") {
             mode.destroy();
         }

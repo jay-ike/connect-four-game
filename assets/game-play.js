@@ -43,7 +43,7 @@ components.container.addEventListener("click", function ({target}) {
     }
     if (typeof modeMap[target.dataset.mode] === "function") {
         index = 2;
-        mode = modeMap[target.dataset.mode]();
+        mode = modeMap[target.dataset.mode](engine);
         engine.setMode(mode);
         engine.restart();
     }
