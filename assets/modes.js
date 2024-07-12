@@ -36,8 +36,9 @@ function SimpleMode() {
 function CPUMode() {
     let turn;
     let moves = [];
-    let timer = new StopWatch(5);
+    let timer = new StopWatch(3);
     let engine = {};
+    const maxValue = Number.POSITIVE_INFINITY;
 
     timer.addStopListener(requestSelection);
     timer.init();
@@ -79,6 +80,9 @@ function CPUMode() {
         }
     }
 
+    function boardFilled(board, depth) {
+        return depth === 0 || board[0].every((val) => val !== 0);
+    }
     function getValidColumn(board) {
         const validCols = [];
         const columns = board[0].length;
@@ -106,73 +110,71 @@ function CPUMode() {
             return row
         }
     }
-    function evaluateRange(range, piece) {
-        const playerFields = range.filter((val) => val === piece).length;
+    function evaluateRange(range, piece, isMaximized) {
+        const connections = range.reduce(function (acc, val) {
+            if (val === piece) {
+                acc.acc += 1;
+            } else {
+                acc.acc = 0;
+            }
+            acc.count = Math.max(acc.count, acc.acc);
+            return acc;
+        }, {acc:0, count: 0});
         const emptyFields = range.filter((val) => val === 0).length;
-        let opponentFields;
         let score = 0;
-        let opponent = 1;
 
-        if (piece = 1) {
-            opponent = 2;
+        if (connections.count >= 4) {
+            score = maxValue;
+        } else {
+            score = Math.pow(connections.count, 2) + Math.pow(emptyFields, 2);
         }
-        opponentFields = range.filter((val) => val === opponent).length;
-        if (playerFields === 4) {
-            score += 100;
-        }
-        if (playerFields === 3 && emptyFields === 1) {
-            score += 5;
-        }
-        if (playerFields === 2 && emptyFields === 2) {
-            score += 2;
-        }
-        if (opponentFields === 3 && emptyFields === 1) {
-            score -= 4;
+        if (!isMaximized) {
+            score *= -1;
         }
         return score;
     }
-    function horizontalScores(board, windowLength, piece) {
+    function horizontalScores(board, windowLength) {
         let totalScore = board.map(function (arr) {
             const max = arr.length - windowLength;
-            let score = 0;
+            let score = [];
             let i = 0;
             while (i < arr.length - max && max >= 0) {
-                score += evaluateRange(arr.slice(i, i + windowLength), piece);
+                score.push(arr.slice(i, i + windowLength));
                 i += 1;
             }
             return score;
-        }).reduce((acc, val) => acc + val, 0);
+        }).reduce((acc, val) => acc.concat(val));
         return totalScore;
     }
-    function verticalScores(board, windowLength, piece) {
+    function verticalScores(board, windowLength) {
         const max = board.length - windowLength;
         const range = new Array(windowLength).fill(0);
         let row;
         let col = 0;
-        let score = 0;
+        let score = [];
         while(col < board[0].length) {
             row = 0;
             while (row <= max && max >= 0) {
-                score += evaluateRange(range.map(
+                score.push(range.map(
                     (ignore, i) => board[row + i][col]
-                ), piece);
+                ));
                 row += 1;
             }
             col += 1;
         }
         return score;
     }
-    function positiveDiagonalScores(board, windowLength, piece) {
+    function positiveDiagonalScores(board, windowLength) {
         const range = new Array(windowLength).fill(0);
-        let score = 0;
+        let score = [];
         let row = board.length;
         let col;
         while (row - windowLength >= 0) {
             col = 0;
             while (col + windowLength - 1 < board[0].length) {
-                score += evaluateRange(range.map(
+                score.push(range.map(
                     (ignore, i) => board[row - 1 - i][col + i]
-                ), piece);
+                ));
                 col += 1;
             }
 
@@ -180,21 +182,105 @@ function CPUMode() {
         }
         return score;
     }
-    function getScore(board, piece) {
+    function negativeDiagonalScores(board, windowLength) {
+        const range = new Array(windowLength).fill(0);
+        let score = [];
+        let row = 0;
+        let col;
+
+        while (row + windowLength - 1 < board.length)  {
+            col = 0;
+            while (col + windowLength - 1 < board[0].length) {
+                score.push(range.map(
+                    (ignore, i) => board[row +i][col + i]
+                ));
+                col += 1;
+            }
+            row += 1;
+        }
+
+        return score;
+    }
+    function getScore(board, piece, isMaximized) {
         const columns = board[0].length;
         let col = Math.floor(columns / 2);
-        let row = board.length;
         let score = board.map((arr) => arr[col]).filter(
             (val) => val === piece
         ).length * 3;
+        score += horizontalScores(board, 4).concat(
+            verticalScores(board, 4)
+        ).concat(positiveDiagonalScores(board, 4)).concat(
+            negativeDiagonalScores(board, 4)
+        ).map(
+            (val) => evaluateRange(val, piece, isMaximized)
+        ).reduce((acc, val) => acc + val, 0);
+        return score;
+    }
+    function minimax(board, depth, alpha, beta, opponent, maximized) {
+        const validCols = getValidColumn(board);
+        let result;
+        let col = 0;
+        let row;
+        let clone;
+        let score = getScore(board, markers()[(
+            maximized
+            ? turn
+            : opponent
+        )], maximized);
+        if (boardFilled(board, depth) || Math.abs(score) === maxValue) {
+            return [null, score];
+        }
+        result = [
+            validCols[Math.floor(Math.random() * validCols.length)],
+            score
+        ];
+        if (maximized) {
+            while (col < validCols.length) {
+                clone = board.slice().map((row) => row.slice());
+                row = getNextOpenRow(clone, validCols[col]);
+                clone[row][validCols[col]] = markers()[turn];
+                score = minimax(clone, depth - 1, alpha, beta, opponent, false);
+                console.log("max: ", score, result, col);
+                if (score[1] > result[1]) {
+                    result = [validCols[col], score[1]];
+                }
+                if (score[1] === result[1]) {
+                    result = score;
+                }
+                alpha = score[1];
+                if (alpha >= beta) {
+                    break;
+                }
+                col += 1;
+            }
+        } else {
+            while (col < validCols.length) {
+                clone = board.slice().map((row) => row.slice());
+                row = getNextOpenRow(clone, validCols[col]);
+                clone[row][validCols[col]] = markers()[opponent];
+                score = minimax(clone, depth - 1, alpha, beta, opponent, true);
+                console.log("min: ", score, result, validCols[col]);
+                if (score[1] < result[1]) {
+                    result = [validCols[col], score[1]];
+                }
+                beta = score[1];
+                if (alpha >= beta) {
+                    break;
+                }
+                col += 1;
+            }
+        }
+        return result;
     }
 
     this.updateTurn = function (newTurn) {
-        let discIndex;
+        let disc;
+        let board;
         turn = newTurn;
-        if (turn === "cpu") {
-            discIndex = Math.floor(Math.random() * 42);
-            moves[moves.length] = () => engine.choose(discIndex);
+        if (turn === "cpu" && engine !== null) {
+            board = engine.getBoard();
+            [disc] = minimax(board, 3, -maxValue, maxValue, "player 1", true);
+            moves[moves.length] = () => engine.choose(disc + 1);
             timer.restart();
         }
     };
@@ -202,7 +288,6 @@ function CPUMode() {
     this.selectDisc = function (index) {
         if (turn === "player 1" && typeof engine.choose === "function") {
             engine.choose(index);
-            console.log(positiveDiagonalScores(engine.getBoard(), 4, 1));
         }
     };
     this.getMarkers = markers;

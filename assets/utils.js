@@ -1,4 +1,5 @@
-
+/*jslint browser, this */
+const {clearInterval, clearTimeout, setInterval, setTimeout} = window;
 function sealerFactory() {
     const weakmap = new WeakMap();
     return Object.freeze({

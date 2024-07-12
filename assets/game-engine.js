@@ -159,7 +159,7 @@ function Engine(boardRows = 6, boardCols = 7) {
             }
         };
         turn = new TurnManager(player1, player2);
-        config.getBoard = () => Array.from(board.getMatrix());
+        config.getBoard = () => board.getMatrix();
         config.initialTurn = turn.currentState().currentTurn;
         newMode.setup(config);
         if (typeof mode?.destroy === "function") {
