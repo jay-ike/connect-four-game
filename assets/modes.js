@@ -40,8 +40,7 @@ function CPUMode() {
     let engine = {};
     const maxValue = Number.POSITIVE_INFINITY;
 
-    timer.addStopListener(requestSelection);
-    timer.init();
+    timer.addExpirationListener(requestSelection);
     this.player1 = "player 1";
     this.player2 = "cpu";
 
@@ -77,6 +76,7 @@ function CPUMode() {
         );
         if (canCall && turn === "cpu") {
             fn();
+            timer.stop();
         }
     }
 
@@ -240,7 +240,6 @@ function CPUMode() {
                 row = getNextOpenRow(clone, validCols[col]);
                 clone[row][validCols[col]] = markers()[turn];
                 score = minimax(clone, depth - 1, alpha, beta, opponent, false);
-                console.log("max: ", score, result, col);
                 if (score[1] > result[1]) {
                     result = [validCols[col], score[1]];
                 }
@@ -259,7 +258,6 @@ function CPUMode() {
                 row = getNextOpenRow(clone, validCols[col]);
                 clone[row][validCols[col]] = markers()[opponent];
                 score = minimax(clone, depth - 1, alpha, beta, opponent, true);
-                console.log("min: ", score, result, validCols[col]);
                 if (score[1] < result[1]) {
                     result = [validCols[col], score[1]];
                 }
@@ -278,10 +276,10 @@ function CPUMode() {
         let board;
         turn = newTurn;
         if (turn === "cpu" && engine !== null) {
+            timer.init();
             board = engine.getBoard();
             [disc] = minimax(board, 3, -maxValue, maxValue, "player 1", true);
             moves[moves.length] = () => engine.choose(disc + 1);
-            timer.restart();
         }
     };
 

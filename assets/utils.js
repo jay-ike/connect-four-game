@@ -1,5 +1,5 @@
 /*jslint browser, this */
-const {clearInterval, clearTimeout, setInterval, setTimeout} = window;
+const {cancelAnimationFrame, requestAnimationFrame} = window;
 function sealerFactory() {
     const weakmap = new WeakMap();
     return Object.freeze({
@@ -73,25 +73,40 @@ function Emitter(initialListeners) {
 }
 
 function StopWatch(delayInSecond = 15, tickInSecond = 1) {
-    let intervalId;
+    let zero;
     let timeoutId;
     let timeout;
     const emitter = new Emitter(["delay", "tick"]);
+    if (delayInSecond < tickInSecond) {
+        throw new Error("The tick time should be lesser than the delay");
+    }
+    function firstFrame(timeStamp) {
+        zero = timeStamp;
+        step(timeStamp);
+    }
+    function step(timeStamp) {
+        let time = (timeStamp - zero) / (tickInSecond * 1000);
+        if (time < 1) {
+            cancelAnimationFrame(timeoutId);
+            timeoutId = requestAnimationFrame(step);
+        } else {
+            timeout -= tickInSecond;
+            if (timeout < 1) {
+                emitter.notify("delay");
+            } else {
+                emitter.notify("tick", timeout);
+                cancelAnimationFrame(timeoutId);
+                timeoutId = requestAnimationFrame(firstFrame);
+            }
+        }
+    }
     this.init = function init(delay = delayInSecond) {
         timeout = delay;
         emitter.notify("tick", timeout);
-        intervalId = setInterval(function () {
-            timeout -= tickInSecond;
-            emitter.notify("tick", timeout);
-        }, tickInSecond * 1000);
-        timeoutId = setTimeout(function () {
-            clearInterval(intervalId);
-            emitter.notify("delay");
-        }, delay * 1000);
+        timeoutId = requestAnimationFrame(firstFrame);
     };
     this.pause = function pause() {
-        clearInterval(intervalId);
-        clearTimeout(timeoutId);
+        cancelAnimationFrame(timeoutId);
     };
     this.restart = function restart(delay) {
         this.pause();
@@ -107,7 +122,7 @@ function StopWatch(delayInSecond = 15, tickInSecond = 1) {
     this.addTickListener = function tickListener(fn, listenWhen) {
         emitter.register("tick", fn, listenWhen);
     };
-    this.addStopListener = function stopLister(fn, listenWhen) {
+    this.addExpirationListener = function stopLister(fn, listenWhen) {
         emitter.register("delay", fn, listenWhen);
     };
 }

@@ -24,7 +24,7 @@ function Engine(boardRows = 6, boardCols = 7) {
         timer.restart();
     }
     timer.addTickListener((time) => emitter.notify("time", time));
-    timer.addStopListener(switchTurn);
+    timer.addExpirationListener(switchTurn);
     this.getBoardIndexes = () => board.getBoardIndexes();
     this.addTimeListener = function (node) {
         const listener = function (time) {
